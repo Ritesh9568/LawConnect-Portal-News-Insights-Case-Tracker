@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Law Firm Connect — Justice, Delivered</title>
+  <link rel="stylesheet" href="css/styles.css"/>
+
+  <style>
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      padding: 6rem 2rem;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.06) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 10% 80%, rgba(26,36,60,0.8) 0%, transparent 60%);
+      z-index: 0;
+    }
+    .hero-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+      background-size: 80px 80px;
+      z-index: 0;
+      animation: gridDrift 20s linear infinite;
+    }
+    @keyframes gridDrift { from { background-position: 0 0; } to { background-position: 80px 80px; } }
+
+    .hero-eyebrow {
+      font-size: 0.72rem; letter-spacing: 0.25em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 1.5rem;
+      position: relative; z-index: 1;
+      opacity: 0; transform: translateY(20px);
+      animation: fadeUp 0.8s 0.2s forwards;
+    }
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 8vw, 7rem);
+      font-weight: 300; line-height: 1.05;
+      letter-spacing: -0.01em;
+      color: var(--white);
+      position: relative; z-index: 1;
+      opacity: 0; transform: translateY(30px);
+      animation: fadeUp 0.9s 0.4s forwards;
+    }
+    .hero-title strong {
+      font-weight: 700; color: var(--gold-light);
+      display: block;
+    }
+    .hero-sub {
+      font-size: 1.05rem; color: var(--muted);
+      max-width: 560px; margin: 1.5rem auto 0;
+      position: relative; z-index: 1;
+      opacity: 0; transform: translateY(20px);
+      animation: fadeUp 0.8s 0.6s forwards;
+    }
+    .hero-cta {
+      display: flex; gap: 1.2rem; flex-wrap: wrap;
+      justify-content: center; margin-top: 3rem;
+      position: relative; z-index: 1;
+      opacity: 0; animation: fadeUp 0.8s 0.8s forwards;
+    }
+    .hero-scroll {
+      position: absolute; bottom: 2.5rem; left: 50%;
+      transform: translateX(-50%);
+      z-index: 1; text-align: center;
+      color: var(--muted); font-size: 0.72rem;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      animation: bounce 2s infinite;
+    }
+    .hero-scroll::before {
+      content: ''; display: block; width: 1px; height: 40px;
+      background: linear-gradient(var(--gold), transparent);
+      margin: 0 auto 0.5rem;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50%       { transform: translateX(-50%) translateY(6px); }
+    }
+    @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Scales decoration ── */
+    .scales-svg {
+      position: absolute; right: -60px; top: 50%;
+      transform: translateY(-50%);
+      opacity: 0.04; width: 500px;
+      animation: scaleSway 8s ease-in-out infinite;
+    }
+    @keyframes scaleSway {
+      0%, 100% { transform: translateY(-50%) rotate(-2deg); }
+      50%       { transform: translateY(-50%) rotate(2deg); }
+    }
+
+    /* ── Stats row ── */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1.5rem; padding: 3rem 4rem;
+      border-bottom: 1px solid var(--navy-border);
+    }
+    .stat-item { text-align: center; }
+    .stat-num {
+      font-family: var(--font-display);
+      font-size: 2.6rem; font-weight: 700;
+      color: var(--gold-light);
+      display: block; line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.75rem; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--muted); margin-top: 0.4rem;
+    }
+
+    /* ── Features ── */
+    .features-section { padding: 6rem 4rem; }
+    .features-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem; margin-top: 3rem;
+    }
+    .feature-card {
+      background: var(--navy-card);
+      border: 1px solid var(--navy-border);
+      border-radius: 12px; padding: 2rem;
+      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+      transform-style: preserve-3d;
+    }
+    .feature-card:hover {
+      transform: translateY(-8px) rotateX(3deg);
+      border-color: rgba(201,168,76,0.3);
+    }
+    .feature-icon {
+      width: 48px; height: 48px; border-radius: 10px;
+      background: var(--gold-dim);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.2rem;
+      font-size: 1.4rem;
+    }
+    .feature-title {
+      font-family: var(--font-display); font-size: 1.2rem;
+      font-weight: 600; color: var(--gold-light); margin-bottom: 0.5rem;
+    }
+    .feature-desc { color: var(--muted); font-size: 0.88rem; line-height: 1.65; }
+
+    /* ── Quick cases preview ── */
+    .preview-section { padding: 4rem 4rem 6rem; }
+    .cases-preview-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem; margin-top: 2rem;
+    }
+
+    /* ── Portal CTA ── */
+    .portal-section {
+      padding: 6rem 4rem;
+      position: relative; overflow: hidden;
+      border-top: 1px solid var(--navy-border);
+      display: grid; grid-template-columns: 1fr 400px;
+      gap: 4rem; align-items: center;
+    }
+    .portal-section::before {
+      content: '';
+      position: absolute; right: -100px; top: 50%;
+      transform: translateY(-50%);
+      width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(201,168,76,0.05) 0%, transparent 70%);
+    }
+    .portal-form-card {
+      background: var(--navy-card);
+      border: 1px solid var(--navy-border);
+      border-top: 2px solid var(--gold);
+      border-radius: 14px; padding: 2.5rem;
+      position: relative; z-index: 1;
+    }
+    .portal-form-title {
+      font-family: var(--font-display); font-size: 1.4rem;
+      color: var(--gold-light); margin-bottom: 1.5rem;
+    }
+    .portal-input {
+      width: 100%;
+      background: var(--navy); border: 1px solid var(--navy-border);
+      color: var(--white); border-radius: 8px;
+      padding: 0.65rem 1rem; font-family: var(--font-body);
+      font-size: 0.9rem; margin-bottom: 1rem; outline: none;
+      transition: all 0.3s ease;
+    }
+    .portal-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+    }
+
+    .nav-login-link { margin-left: auto; color: var(--gold); cursor: pointer; }
+    .preview-btn-wrapper { text-align: center; margin-top: 2.5rem; }
+    .portal-body-text { color: var(--muted); margin-top: 1rem; max-width: 420px; }
+    .portal-submit-btn { width: 100%; }
+    .portal-footer-linkback { text-align: center; margin-top: 1.2rem; font-size: 0.82rem; color: var(--muted); }
+    .portal-register-anchor { color: var(--gold); text-decoration: none; }
+    .state-msg-icon-dim { opacity: 0.4; }
+
+    @media (max-width: 900px) {
+      .stats-row { padding: 2rem 1.5rem; }
+      .features-section, .preview-section, .portal-section { padding: 4rem 1.5rem; }
+      .portal-section { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .hero { padding: 4rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<header class="site-header">
+  <img src="image/law-firm-logo.jpg" alt="Law Firm Connect" class="logo" width="60" height="60"
+    onerror="this.style.display='none'"/>
+  <div>
+    <h1>Law Firm Connect</h1>
+    <p>Connecting Clients and Lawyers Seamlessly</p>
+  </div>
+</header>
+
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="index.html" class="active">Home</a>
+    <div class="nav-dropdown">
+      <a href="cases.html">Cases &#9662;</a>
+      <ul class="nav-dropdown-menu">
+        <li><a href="cases.html">Available Cases</a></li>
+        <li><a href="my-cases.html">My Cases</a></li>
+        <li><a href="submit-case.html">Submit a Case</a></li>
+      </ul>
+    </div>
+    <a href="lawyers.html">Lawyers</a>
+    <a href="news.html">News &amp; Insights</a>
+    <a href="about.html">About Us</a>
+    <a href="login.html" class="nav-login-link" id="nav-auth-btn">Login</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <svg class="scales-svg" viewBox="0 0 200 200" fill="white" xmlns="http://www.w3.org/2000/svg">
+    <line x1="100" y1="20" x2="100" y2="180" stroke="white" stroke-width="2"/>
+    <line x1="20" y1="60" x2="180" y2="60" stroke="white" stroke-width="2"/>
+    <circle cx="20" cy="60" r="25" fill="none" stroke="white" stroke-width="2"/>
+    <circle cx="180" cy="60" r="25" fill="none" stroke="white" stroke-width="2"/>
+    <line x1="100" y1="20" x2="20" y2="60" stroke="white" stroke-width="1.5"/>
+    <line x1="100" y1="20" x2="180" y2="60" stroke="white" stroke-width="1.5"/>
+    <rect x="85" y="175" width="30" height="8" fill="white"/>
+  </svg>
+
+  <p class="hero-eyebrow">Trusted Legal Platform</p>
+  <h2 class="hero-title">Justice<strong>Within Reach</strong></h2>
+  <p class="hero-sub">Connect with experienced legal professionals. Find the right lawyer, track your case, and get the representation you deserve.</p>
+  <div class="hero-cta">
+    <a href="cases.html"><button class="btn-gold"><span>Browse Cases</span></button></a>
+    <a href="lawyers.html"><button class="btn-gold"><span>Find a Lawyer</span></button></a>
+  </div>
+  <div class="hero-scroll">Scroll</div>
+</section>
+
+<div class="stats-row reveal">
+  <div class="stat-item">
+    <span class="stat-num" data-target="2400">0</span>
+    <div class="stat-label">Cases Handled</div>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num" data-target="380">0</span>
+    <div class="stat-label">Verified Lawyers</div>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num" data-target="94">0</span>
+    <div class="stat-label">% Success Rate</div>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num" data-target="18">0</span>
+    <div class="stat-label">Practice Areas</div>
+  </div>
+</div>
+
+<section class="features-section">
+  <div class="reveal">
+    <p class="section-eyebrow">Why Law Firm Connect</p>
+    <h2 class="section-heading">Built for <span>Modern Legal Work</span></h2>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card reveal">
+      <div class="feature-icon">&#9878;&#65039;</div>
+      <div class="feature-title">Smart Case Matching</div>
+      <p class="feature-desc">Our system intelligently matches clients with lawyers based on specialization, location, and case complexity.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">&#128308;</div>
+      <div class="feature-title">Real-Time Updates</div>
+      <p class="feature-desc">Live Socket.io notifications keep you informed the moment your case status changes.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">&#128274;</div>
+      <div class="feature-title">Secure Portal</div>
+      <p class="feature-desc">JWT-based authentication ensures your documents and communications remain fully private.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">&#128172;</div>
+      <div class="feature-title">Direct Messaging</div>
+      <p class="feature-desc">Communicate directly with your legal representative without leaving the platform.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">&#128680;</div>
+      <div class="feature-title">Emergency Cases</div>
+      <p class="feature-desc">Flag urgent matters for priority handling and immediate lawyer attention.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">&#128194;</div>
+      <div class="feature-title">Case History</div>
+      <p class="feature-desc">Full timeline and status history for every case — always know where things stand.</p>
+    </div>
+  </div>
+</section>
+
+<section class="preview-section">
+  <div class="reveal">
+    <p class="section-eyebrow">Live Board</p>
+    <h2 class="section-heading">Recent <span>Open Cases</span></h2>
+  </div>
+  <div class="cases-preview-grid" id="previewCases">
+    <div class="state-msg"><span class="state-msg-icon-dim">Loading cases…</span></div>
+  </div>
+  <div class="reveal preview-btn-wrapper">
+    <a href="cases.html"><button class="btn-gold"><span>View All Cases &#8594;</span></button></a>
+  </div>
+</section>
+
+<section class="portal-section" id="portal-login-section">
+  <div class="reveal">
+    <p class="section-eyebrow">Your Portal</p>
+    <h2 class="section-heading">Already a <span>Member?</span></h2>
+    <p class="portal-body-text">Sign in to access your active cases, message your lawyer, and receive real-time updates on your legal matters.</p>
+  </div>
+  <div id="landing-login-form" class="portal-form-card reveal">
+    <div class="portal-form-title">Sign In to Continue</div>
+    <input type="text" id="portal-email" class="portal-input" placeholder="Username or Email" autocomplete="username"/>
+    <input type="password" id="portal-password" class="portal-input" placeholder="Password" autocomplete="current-password"/>
+    <button type="button" id="portal-submit-btn" class="btn-gold portal-submit-btn"><span>Login &#8594;</span></button>
+    <p class="portal-footer-linkback">New client? <a href="register.html" class="portal-register-anchor">Register here</a></p>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <p>&copy; <span id="year"></span> Law Firm Connect. All Rights Reserved.</p>
+</footer>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('token');
+
+    // ── Auth guard: redirect unauthenticated users to login ──
+    // Done here (after DOM loads) so the page at least parses first,
+    // avoiding the "blank page on direct load" issue with the old inline script.
+    if (!token) {
+      window.location.replace('login.html');
+      return; // stop remaining DOMContentLoaded logic
+    }
+
+    // ── Logged-in tweaks ──
+    const loginSection = document.getElementById('portal-login-section');
+    if (loginSection) loginSection.style.display = 'none';
+
+    const authBtn = document.getElementById('nav-auth-btn');
+    if (authBtn) {
+      authBtn.textContent = 'Logout';
+      authBtn.href = '#';
+      authBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.clear();
+        window.location.replace('login.html');
+      });
+    }
+  });
+
+  // ── Cursor ──
+  const cur = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  document.addEventListener('mousemove', e => {
+    cur.style.left  = e.clientX + 'px';
+    cur.style.top   = e.clientY + 'px';
+    ring.style.left = e.clientX + 'px';
+    ring.style.top  = e.clientY + 'px';
+  });
+
+  // ── Year ──
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // ── Scroll reveal ──
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  // ── Counter animation ──
+  function animateCounter(el) {
+    const target = +el.dataset.target;
+    const dur = 1800;
+    let current = 0;
+    const timer = setInterval(() => {
+      current += target / (dur / 16);
+      if (current >= target) { current = target; clearInterval(timer); }
+      el.textContent = Math.floor(current).toLocaleString();
+    }, 16);
+  }
+  const counterObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.querySelectorAll('[data-target]').forEach(animateCounter);
+        counterObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.stats-row').forEach(el => counterObs.observe(el));
+
+  // ── 3D card tilt ──
+  function applyTiltAnimation(element) {
+    element.addEventListener('mousemove', e => {
+      const rect = element.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width  - 0.5;
+      const y = (e.clientY - rect.top)  / rect.height - 0.5;
+      element.style.transform = `translateY(-8px) rotateX(${-y * 10}deg) rotateY(${x * 10}deg)`;
+    });
+    element.addEventListener('mouseleave', () => {
+      element.style.transform = '';
+    });
+  }
+  document.querySelectorAll('.feature-card').forEach(applyTiltAnimation);
+
+  // ── Cases preview ──
+  async function loadPreview() {
+    try {
+      const r = await fetch('/api/cases');
+      const data = await r.json();
+      const limited = data.slice(0, 3); // take first 3
+      
+      const grid = document.getElementById('previewCases');
+      if (!data.length) {
+        grid.innerHTML = '<div class="state-msg">No cases yet.</div>';
+        return;
+      }
+      grid.innerHTML = data.map(c => `
+        <div class="case-card reveal">
+          <div class="case-card-area">${c.area || 'General'}</div>
+          <div class="case-card-title">${c.title}</div>
+          <p class="case-card-desc">${(c.description || '').slice(0, 100)}${(c.description || '').length > 100 ? '…' : ''}</p>
+          <span class="badge-status badge-${(c.status || 'available').toLowerCase()}">${c.status || 'Available'}</span>
+          ${c.is_emergency ? '<span class="badge-status badge-emergency">Emergency</span>' : ''}
+        </div>`).join('');
+      grid.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+      grid.querySelectorAll('.case-card').forEach(applyTiltAnimation);
+    } catch (e) {
+      document.getElementById('previewCases').innerHTML =
+        '<div class="state-msg"><i>&#9878;&#65039;</i> Connect to the server to see live cases.</div>';
+    }
+  }
+  loadPreview();
+
+  // ── Inline login form (portal section) ──
+  document.getElementById('portal-submit-btn')?.addEventListener('click', async () => {
+    const email    = document.getElementById('portal-email').value.trim();
+    const password = document.getElementById('portal-password').value;
+    const btn      = document.getElementById('portal-submit-btn');
+
+    if (!email || !password) { alert('Please enter your credentials.'); return; }
+
+    btn.disabled = true;
+    btn.querySelector('span').textContent = 'Authenticating…';
+
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Login failed');
+
+      localStorage.setItem('token',     data.token);
+      localStorage.setItem('role',      data.role);
+      localStorage.setItem('userEmail', data.user.email);
+
+      btn.querySelector('span').textContent = 'Success! Redirecting…';
+      setTimeout(() => { window.location.href = 'index.html'; }, 800);
+    } catch (err) {
+      alert(err.message);
+      btn.disabled = false;
+      btn.querySelector('span').textContent = 'Login →';
+    }
+  });
+</script>
+</body>
+</html>

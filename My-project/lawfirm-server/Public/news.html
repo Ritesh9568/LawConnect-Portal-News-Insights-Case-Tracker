@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>News &amp; Insights — Law Firm Connect</title>
+  <link rel="stylesheet" href="css/styles.css"/>
+  <style>
+    /* ── Page Hero ── */
+    .page-hero {
+      padding: 5rem 4rem 3rem;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid var(--navy-border);
+    }
+    .page-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 80% at 20% 50%, rgba(201,168,76,0.05) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .page-hero-sub {
+      color: var(--muted);
+      margin-top: 0.7rem;
+      font-size: 0.95rem;
+      max-width: 520px;
+    }
+
+    /* ── Main ── */
+    .news-main { padding: 3rem 4rem; }
+
+    /* ── Search Bar ── */
+    .news-search-wrap {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      align-items: center;
+    }
+    .news-search-input {
+      flex: 1;
+      background: var(--navy-card);
+      border: 1px solid var(--navy-border);
+      color: var(--white);
+      border-radius: 8px;
+      padding: 0.7rem 1rem 0.7rem 2.8rem;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+    .news-search-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+    }
+    .news-search-input::placeholder { color: var(--muted); opacity: 0.7; }
+    .news-search-wrap-inner {
+      flex: 1;
+      position: relative;
+    }
+    .news-search-icon {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 1rem;
+      pointer-events: none;
+    }
+    .btn-search {
+      background: var(--gold);
+      color: #0a0d1a;
+      border: none;
+      border-radius: 8px;
+      padding: 0.7rem 1.6rem;
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+    .btn-search:hover { background: var(--gold-light); }
+
+    /* ── Category Tabs ── */
+    .category-tabs {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--navy-border);
+      padding-bottom: 1rem;
+    }
+    .cat-tab {
+      background: transparent;
+      border: 1px solid var(--navy-border);
+      color: var(--muted);
+      border-radius: 20px;
+      padding: 0.4rem 1rem;
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .cat-tab:hover { border-color: var(--gold); color: var(--gold); }
+    .cat-tab.active {
+      background: rgba(201,168,76,0.12);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    /* ── Featured Hero Article ── */
+    .featured-article {
+      background: var(--navy-card);
+      border: 1px solid var(--navy-border);
+      border-top: 3px solid var(--gold);
+      border-radius: 14px;
+      padding: 2.5rem;
+      margin-bottom: 3rem;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.23,1,0.32,1);
+    }
+    .featured-article::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(201,168,76,0.04) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .featured-article:hover { border-color: rgba(201,168,76,0.5); box-shadow: 0 20px 40px rgba(0,0,0,0.25); }
+    .featured-article:hover::before { opacity: 1; }
+    .featured-badge {
+      display: inline-block;
+      background: rgba(201,168,76,0.15);
+      border: 1px solid rgba(201,168,76,0.3);
+      color: var(--gold);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+    }
+    .featured-title {
+      font-family: var(--font-display);
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.3;
+      margin-bottom: 0.9rem;
+      max-width: 700px;
+    }
+    .featured-excerpt {
+      font-size: 0.95rem;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 680px;
+      margin-bottom: 1.5rem;
+    }
+    .featured-meta {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .meta-tag {
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.8;
+    }
+    .meta-date {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .meta-source {
+      font-size: 0.78rem;
+      color: var(--muted);
+      opacity: 0.7;
+    }
+    .featured-read-more {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 1.5rem;
+    }
+
+    /* ── News Grid ── */
+    .news-section-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    .news-card {
+      background: var(--navy-card);
+      border: 1px solid var(--navy-border);
+      border-radius: 14px;
+      padding: 1.6rem;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.23,1,0.32,1);
+      cursor: pointer;
+    }
+    .news-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .news-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(201,168,76,0.3);
+      box-shadow: 0 16px 32px rgba(0,0,0,0.2);
+    }
+    .news-card:hover::after { opacity: 1; }
+    .news-card-category {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+      opacity: 0.85;
+    }
+    .news-card-title {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--white);
+      line-height: 1.4;
+      margin-bottom: 0.75rem;
+      flex: 1;
+    }
+    .news-card-excerpt {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 1.2rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .news-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--navy-border);
+      padding-top: 0.9rem;
+      margin-top: auto;
+    }
+    .news-card-date { font-size: 0.72rem; color: var(--muted); opacity: 0.7; }
+    .news-card-source { font-size: 0.7rem; color: var(--gold); opacity: 0.7; }
+
+    /* ── Load More ── */
+    .load-more-wrap {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+    .btn-load-more {
+      background: transparent;
+      border: 1px solid var(--navy-border);
+      color: var(--muted);
+      border-radius: 8px;
+      padding: 0.75rem 2.5rem;
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      letter-spacing: 0.05em;
+    }
+    .btn-load-more:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(201,168,76,0.05);
+    }
+    .btn-load-more:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* ── Newsletter ── */
+    .newsletter-section {
+      background: var(--navy-card);
+      border: 1px solid var(--navy-border);
+      border-top: 2px solid var(--gold);
+      border-radius: 14px;
+      padding: 2.5rem;
+      margin-bottom: 4rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .newsletter-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 50% 100% at 50% 100%, rgba(201,168,76,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .newsletter-icon {
+      font-size: 2rem;
+      color: var(--gold);
+      opacity: 0.6;
+      margin-bottom: 1rem;
+    }
+    .newsletter-title {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--gold-light);
+      margin-bottom: 0.5rem;
+    }
+    .newsletter-sub {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 1.8rem;
+    }
+    .newsletter-form {
+      display: flex;
+      gap: 0.75rem;
+      max-width: 480px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .newsletter-input {
+      flex: 1;
+      min-width: 220px;
+      background: var(--navy);
+      border: 1px solid var(--navy-border);
+      color: var(--white);
+      border-radius: 8px;
+      padding: 0.7rem 1rem;
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+    .newsletter-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+    }
+    .newsletter-input::placeholder { color: var(--muted); opacity: 0.6; }
+    .newsletter-success {
+      display: none;
+      color: var(--green-ok);
+      font-size: 0.88rem;
+      margin-top: 1rem;
+    }
+
+    /* ── States ── */
+    .state-msg {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--muted);
+      grid-column: 1 / -1;
+    }
+    .state-msg-icon {
+      font-size: 2.5rem;
+      display: block;
+      margin-bottom: 1rem;
+      opacity: 0.25;
+    }
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(201,168,76,0.2);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 0.5rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Article Modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5,8,20,0.9);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-box {
+      background: var(--navy-card);
+      border: 1px solid var(--navy-border);
+      border-top: 2px solid var(--gold);
+      border-radius: 14px;
+      padding: 2.5rem;
+      width: min(640px, 92vw);
+      max-height: 80vh;
+      overflow-y: auto;
+      transform: translateY(24px) scale(0.97);
+      transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    .modal-category {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+    }
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.35;
+      margin-bottom: 1rem;
+    }
+    .modal-meta {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.2rem;
+      border-bottom: 1px solid var(--navy-border);
+    }
+    .modal-body {
+      font-size: 0.92rem;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+    .modal-body p { margin-bottom: 1rem; }
+    .modal-footer-btns {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 2rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid var(--navy-border);
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .btn-modal-close {
+      background: transparent;
+      border: 1px solid var(--navy-border);
+      color: var(--muted);
+      padding: 0.6rem 1.4rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+    }
+    .btn-modal-close:hover { color: var(--white); border-color: var(--muted); }
+    .btn-read-source {
+      font-size: 0.78rem;
+      color: var(--gold);
+      opacity: 0.8;
+      font-weight: 600;
+      text-decoration: none;
+      letter-spacing: 0.06em;
+    }
+    .btn-read-source:hover { opacity: 1; }
+
+    /* ── Scrollbar ── */
+    .modal-box::-webkit-scrollbar { width: 4px; }
+    .modal-box::-webkit-scrollbar-track { background: var(--navy); }
+    .modal-box::-webkit-scrollbar-thumb { background: var(--navy-border); border-radius: 2px; }
+
+    @media (max-width: 768px) {
+      .news-main { padding: 2rem 1.5rem; }
+      .page-hero { padding: 3rem 1.5rem 2rem; }
+      .featured-title { font-size: 1.3rem; }
+      .newsletter-section { padding: 1.8rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- ── Header ── -->
+<header class="site-header">
+  <img src="image/law-firm-logo.jpg" alt="Law Firm Connect" class="logo" width="60" height="60"
+    onerror="this.style.display='none'"/>
+  <div>
+    <h1>Law Firm Connect</h1>
+    <p>Connecting Clients and Lawyers Seamlessly</p>
+  </div>
+</header>
+
+<!-- ── Nav ── -->
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="index.html">Home</a>
+    <div class="nav-dropdown">
+      <a href="cases.html">Cases &#9662;</a>
+      <ul class="nav-dropdown-menu">
+        <li><a href="cases.html">Available Cases</a></li>
+        <li><a href="my-cases.html">My Cases</a></li>
+        <li><a href="submit-case.html">Submit a Case</a></li>
+      </ul>
+    </div>
+    <a href="lawyers.html">Lawyers</a>
+    <a href="news.html" class="active">News &amp; Insights</a>
+    <a href="about.html">About Us</a>
+    <a href="login.html" class="nav-login-link" id="nav-auth-btn">Login</a>
+  </div>
+</nav>
+
+<!-- ── Page Hero ── -->
+<div class="page-hero reveal">
+  <p class="section-eyebrow">Legal Intelligence</p>
+  <h2 class="section-heading">News &amp; <span>Insights</span></h2>
+  <p class="page-hero-sub">
+    Stay informed with the latest developments in Indian and global law, landmark judgments, and legal commentary — powered by live AI research.
+  </p>
+</div>
+
+<!-- ── Main ── -->
+<main class="news-main">
+
+  <!-- Search -->
+  <div class="news-search-wrap reveal">
+    <div class="news-search-wrap-inner">
+      <span class="news-search-icon">&#128269;</span>
+      <input type="text" id="newsSearch" class="news-search-input"
+        placeholder="Search legal news — e.g. Supreme Court ruling, IPC amendment…"
+        aria-label="Search legal news"/>
+    </div>
+    <button class="btn-search" id="btnSearch">Search</button>
+  </div>
+
+  <!-- Category Tabs -->
+  <div class="category-tabs reveal" role="tablist" aria-label="News categories">
+    <button class="cat-tab active" data-cat="Top Legal News" role="tab" aria-selected="true">All</button>
+    <button class="cat-tab" data-cat="Supreme Court India" role="tab" aria-selected="false">Supreme Court</button>
+    <button class="cat-tab" data-cat="Criminal Law India" role="tab" aria-selected="false">Criminal Law</button>
+    <button class="cat-tab" data-cat="Corporate Law India" role="tab" aria-selected="false">Corporate Law</button>
+    <button class="cat-tab" data-cat="Family Law India" role="tab" aria-selected="false">Family Law</button>
+    <button class="cat-tab" data-cat="Cyber Law India" role="tab" aria-selected="false">Cyber Law</button>
+    <button class="cat-tab" data-cat="Constitutional Law India" role="tab" aria-selected="false">Constitutional</button>
+    <button class="cat-tab" data-cat="International Law" role="tab" aria-selected="false">International</button>
+  </div>
+
+  <!-- Featured Article -->
+  <div id="featuredWrap" class="reveal"></div>
+
+  <!-- News Grid -->
+  <p class="news-section-title" id="gridLabel">Latest Articles</p>
+  <div class="news-grid" id="newsGrid">
+    <div class="state-msg" style="grid-column:1/-1">
+      <span class="spinner"></span> Fetching live legal news…
+    </div>
+  </div>
+
+  <!-- Load More -->
+  <div class="load-more-wrap reveal">
+    <button class="btn-load-more" id="btnLoadMore" disabled>Load More Articles</button>
+  </div>
+
+  <!-- Newsletter -->
+  <div class="newsletter-section reveal">
+    <div class="newsletter-icon">&#128240;</div>
+    <div class="newsletter-title">Stay Ahead of the Law</div>
+    <p class="newsletter-sub">Get weekly legal insights, landmark judgments, and policy updates — directly in your inbox.</p>
+    <div class="newsletter-form">
+      <input type="email" class="newsletter-input" id="nlEmail"
+        placeholder="your@email.com" aria-label="Email address for newsletter"/>
+      <button class="btn-gold" id="btnSubscribe"><span>Subscribe</span></button>
+    </div>
+    <p class="newsletter-success" id="nlSuccess">&#10003; You're subscribed! Welcome to the community.</p>
+  </div>
+
+</main>
+
+<!-- ── Footer ── -->
+<footer class="site-footer">
+  <p>&copy; <span id="year"></span> Law Firm Connect. All Rights Reserved.</p>
+</footer>
+
+<!-- ── Article Modal ── -->
+<div class="modal-overlay" id="articleModal" role="dialog" aria-modal="true" aria-labelledby="modal-art-title">
+  <div class="modal-box">
+    <div class="modal-category" id="modal-art-cat"></div>
+    <div class="modal-title" id="modal-art-title"></div>
+    <div class="modal-meta" id="modal-art-meta"></div>
+    <div class="modal-body" id="modal-art-body"></div>
+    <div class="modal-footer-btns">
+      <button class="btn-modal-close" id="modal-close-btn">&#8592; Back to News</button>
+      <a href="#" class="btn-read-source" id="modal-source-link" target="_blank" rel="noopener">
+        Read Full Article &#8599;
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ── Cursor ── */
+  const cur = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  document.addEventListener('mousemove', e => {
+    cur.style.left = e.clientX + 'px'; cur.style.top = e.clientY + 'px';
+    ring.style.left = e.clientX + 'px'; ring.style.top = e.clientY + 'px';
+  });
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  /* ── Reveal ── */
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  /* ── Auth (optional — public page) ── */
+  const token = localStorage.getItem('token');
+  const authBtn = document.getElementById('nav-auth-btn');
+  if (token && authBtn) {
+    authBtn.textContent = 'Logout';
+    authBtn.href = '#';
+    authBtn.addEventListener('click', e => {
+      e.preventDefault();
+      localStorage.clear();
+      window.location.replace('login.html');
+    });
+  }
+
+  /* ──────────────────────────────────────────
+     NEWS ENGINE
+     Uses Anthropic API (web_search tool) to
+     fetch real, live legal news articles.
+  ────────────────────────────────────────── */
+
+  let allArticles = [];
+  let currentPage = 0;
+  const PAGE_SIZE = 6;
+  let currentQuery = 'Top Legal News India 2025';
+  let activeCategory = 'Top Legal News';
+
+  /* ── Call Anthropic API with web_search ── */
+  async function fetchLiveNews(query) {
+  const grid = document.getElementById('newsGrid');
+  const featuredWrap = document.getElementById('featuredWrap');
+  const btnLoadMore = document.getElementById('btnLoadMore');
+
+  grid.innerHTML = `<div class="state-msg" style="grid-column:1/-1"><span class="spinner"></span> Fetching live legal news…</div>`;
+  featuredWrap.innerHTML = '';
+  btnLoadMore.disabled = true;
+  allArticles = [];
+  currentPage = 0;
+
+  try {
+    // ✅ Call YOUR server — no CORS, no API key exposed in frontend
+    const res = await fetch('/api/news', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query })
+    });
+
+    if (!res.ok) throw new Error(`Server error ${res.status}`);
+    const data = await res.json();
+
+    // Extract text from Anthropic response blocks
+    const textBlocks = (data.content || []).filter(b => b.type === 'text').map(b => b.text);
+    const rawText = textBlocks.join('');
+
+    const clean = rawText.replace(/```json|```/g, '').trim();
+    const startIdx = clean.indexOf('[');
+    const endIdx   = clean.lastIndexOf(']');
+    if (startIdx === -1 || endIdx === -1) throw new Error('No JSON array in response');
+
+    allArticles = JSON.parse(clean.slice(startIdx, endIdx + 1));
+    if (!Array.isArray(allArticles) || !allArticles.length) throw new Error('Empty articles');
+
+    renderFeatured(allArticles[0]);
+    renderPage();
+
+  } catch (err) {
+    console.error('News fetch error:', err);
+    grid.innerHTML = `<div class="state-msg" style="grid-column:1/-1">
+      <span class="state-msg-icon">⚠️</span>
+      Failed to load live news. Please try again.
+      <br><br>
+      <button class="btn-load-more" onclick="fetchLiveNews(currentQuery)" style="margin-top:0.5rem">Retry</button>
+    </div>`;
+  }
+}
+
+  /* ── Render Featured ── */
+  function renderFeatured(article) {
+    if (!article) return;
+    document.getElementById('featuredWrap').innerHTML = `
+      <div class="featured-article reveal" onclick="openModal(${allArticles.indexOf(article)})">
+        <div class="featured-badge">&#9733; Featured</div>
+        <div class="featured-title">${escHtml(article.title)}</div>
+        <div class="featured-excerpt">${escHtml(article.excerpt)}</div>
+        <div class="featured-meta">
+          <span class="meta-tag">${escHtml(article.category)}</span>
+          <span class="meta-date">${escHtml(article.date)}</span>
+          <span class="meta-source">${escHtml(article.source)}</span>
+        </div>
+        <div class="featured-read-more">Read Article &#8594;</div>
+      </div>`;
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+  }
+
+  /* ── Render paginated grid (skip index 0 — that's featured) ── */
+  function renderPage() {
+    const grid = document.getElementById('newsGrid');
+    const btnLoadMore = document.getElementById('btnLoadMore');
+    const start = currentPage === 0 ? 1 : currentPage * PAGE_SIZE + 1;
+    const end   = Math.min(start + PAGE_SIZE, allArticles.length);
+    const slice = allArticles.slice(start, end);
+
+    if (currentPage === 0) grid.innerHTML = '';
+
+    if (!slice.length && currentPage === 0) {
+      grid.innerHTML = `<div class="state-msg" style="grid-column:1/-1"><span class="state-msg-icon">📰</span>No articles found.</div>`;
+      return;
+    }
+
+    slice.forEach((a, i) => {
+      const idx = allArticles.indexOf(a);
+      const card = document.createElement('div');
+      card.className = 'news-card reveal';
+      card.innerHTML = `
+        <div class="news-card-category">${escHtml(a.category)}</div>
+        <div class="news-card-title">${escHtml(a.title)}</div>
+        <div class="news-card-excerpt">${escHtml(a.excerpt)}</div>
+        <div class="news-card-footer">
+          <span class="news-card-date">${escHtml(a.date)}</span>
+          <span class="news-card-source">${escHtml(a.source)}</span>
+        </div>`;
+      card.addEventListener('click', () => openModal(idx));
+      grid.appendChild(card);
+    });
+
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+    currentPage++;
+    const nextStart = currentPage * PAGE_SIZE + 1;
+    btnLoadMore.disabled = nextStart >= allArticles.length;
+  }
+
+  /* ── Article Modal ── */
+  function openModal(idx) {
+    const a = allArticles[idx];
+    if (!a) return;
+    document.getElementById('modal-art-cat').textContent   = a.category;
+    document.getElementById('modal-art-title').textContent = a.title;
+    document.getElementById('modal-art-meta').textContent  = `${a.date}  ·  ${a.source}`;
+    document.getElementById('modal-art-body').innerHTML    =
+      (a.fullSummary || a.excerpt).split('\n').filter(Boolean).map(p => `<p>${escHtml(p)}</p>`).join('');
+    const link = document.getElementById('modal-source-link');
+    if (a.url && a.url.startsWith('http')) {
+      link.href = a.url;
+      link.style.display = 'inline';
+    } else {
+      link.style.display = 'none';
+    }
+    document.getElementById('articleModal').classList.add('open');
+  }
+
+  document.getElementById('modal-close-btn').addEventListener('click', () => {
+    document.getElementById('articleModal').classList.remove('open');
+  });
+  document.getElementById('articleModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('articleModal'))
+      document.getElementById('articleModal').classList.remove('open');
+  });
+
+  /* ── Category Tabs ── */
+  document.querySelectorAll('.cat-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.cat-tab').forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      activeCategory = tab.dataset.cat;
+      currentQuery = activeCategory + ' 2025';
+      document.getElementById('newsSearch').value = '';
+      document.getElementById('gridLabel').textContent = `${tab.textContent.trim()} Articles`;
+      fetchLiveNews(currentQuery);
+    });
+  });
+
+  /* ── Search ── */
+  function doSearch() {
+    const q = document.getElementById('newsSearch').value.trim();
+    if (!q) return;
+    currentQuery = `${q} legal news India`;
+    document.getElementById('gridLabel').textContent = `Results for "${q}"`;
+    document.querySelectorAll('.cat-tab').forEach(t => {
+      t.classList.remove('active');
+      t.setAttribute('aria-selected', 'false');
+    });
+    fetchLiveNews(currentQuery);
+  }
+
+  document.getElementById('btnSearch').addEventListener('click', doSearch);
+  document.getElementById('newsSearch').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doSearch();
+  });
+
+  /* ── Load More ── */
+  document.getElementById('btnLoadMore').addEventListener('click', () => renderPage());
+
+  /* ── Newsletter ── */
+  document.getElementById('btnSubscribe').addEventListener('click', () => {
+    const email = document.getElementById('nlEmail').value.trim();
+    if (!email || !email.includes('@')) {
+      document.getElementById('nlEmail').focus();
+      return;
+    }
+    document.getElementById('nlEmail').value = '';
+    document.getElementById('nlSuccess').style.display = 'block';
+    setTimeout(() => document.getElementById('nlSuccess').style.display = 'none', 5000);
+  });
+
+  /* ── HTML escape helper ── */
+  function escHtml(str) {
+    return String(str || '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  /* ── Initial load ── */
+  fetchLiveNews(currentQuery);
+</script>
+</body>
+</html>

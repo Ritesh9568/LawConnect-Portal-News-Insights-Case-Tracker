@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Submit a Case — Law Firm Connect</title>
+  <link rel="stylesheet" href="css/styles.css"/>
+  <style>
+    /* ── Page Hero ── */
+    .page-hero {
+      padding: 5rem 4rem 3rem;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid var(--navy-border);
+    }
+    .page-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(201,168,76,0.05) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* ── Layout ── */
+    .submit-main {
+      padding: 3rem 4rem;
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 3rem;
+      align-items: start;
+    }
+
+    /* ── Form Card ── */
+    .form-card {
+      background: var(--navy-card);
+      border: 1px solid var(--navy-border);
+      border-top: 2px solid var(--gold);
+      border-radius: 14px;
+      padding: 2.5rem;
+    }
+
+    .form-section-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 1.4rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      background: var(--navy);
+      border: 1px solid var(--navy-border);
+      color: var(--white);
+      border-radius: 8px;
+      padding: 0.7rem 1rem;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+    }
+
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+      color: var(--muted);
+      opacity: 0.6;
+    }
+
+    .form-select option {
+      background: var(--navy-mid);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 120px;
+      line-height: 1.6;
+    }
+
+    /* ── Emergency toggle ── */
+    .emergency-row {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 1rem 1.2rem;
+      background: rgba(192,57,43,0.06);
+      border: 1px solid rgba(192,57,43,0.2);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 1.4rem;
+    }
+
+    .emergency-row:hover {
+      border-color: rgba(192,57,43,0.4);
+      background: rgba(192,57,43,0.1);
+    }
+
+    .emergency-row input[type="checkbox"] {
+      accent-color: var(--red-alert);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    .emergency-label {
+      font-size: 0.88rem;
+      color: #e74c3c;
+      font-weight: 500;
+    }
+
+    .emergency-sub {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
+    }
+
+    /* ── Divider ── */
+    .form-divider {
+      border: none;
+      border-top: 1px solid var(--navy-border);
+      margin: 1.8rem 0;
+    }
+
+    /* ── Submit button ── */
+    .btn-submit {
+      width: 100%;
+      background: transparent;
+      border: 1.5px solid var(--gold);
+      color: var(--gold-light);
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.85rem 1.8rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.35s cubic-bezier(0.23,1,0.32,1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-submit::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gold);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.35s cubic-bezier(0.23,1,0.32,1);
+      z-index: 0;
+    }
+
+    .btn-submit:hover::before { transform: scaleX(1); }
+    .btn-submit:hover { color: var(--navy); }
+    .btn-submit span { position: relative; z-index: 1; }
+
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-submit:disabled::before { display: none; }
+
+    /* ── Char counter ── */
+    .char-counter {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: right;
+      margin-top: 0.25rem;
+    }
+
+    .char-counter.warn { color: #e67e22; }
+    .char-counter.over { color: var(--red-alert); }
+
+    /* ── Sidebar info panel ── */
+    .info-sidebar { display: flex; flex-direction: column; gap: 1.2rem; }
+
+    .info-card {
+      background: var(--navy-card);
+      border: 1px solid var(--navy-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .info-card-title {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--gold-light);
+      margin-bottom: 1rem;
+    }
+
+    .info-step {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .info-step:last-child { margin-bottom: 0; }
+
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--gold-dim);
+      border: 1px solid rgba(201,168,76,0.3);
+      color: var(--gold-light);
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-text {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .step-text strong { color: var(--white); }
+
+    .area-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.3rem;
+    }
+
+    .area-tag {
+      font-size: 0.7rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: var(--gold-dim);
+      border: 1px solid rgba(201,168,76,0.2);
+      color: var(--gold-light);
+    }
+
+    /* ── Success state ── */
+    .success-overlay {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 3rem 2rem;
+    }
+
+    .success-overlay.show { display: flex; }
+
+    .success-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .success-title {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--gold-light);
+      margin-bottom: 0.5rem;
+    }
+
+    .success-sub {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    /* ── Notification toast ── */
+    .toast-msg {
+      position: fixed;
+      top: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: white;
+      z-index: 2000;
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+
+    .toast-msg.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── Validation error ── */
+    .field-error {
+      font-size: 0.75rem;
+      color: #e74c3c;
+      margin-top: 0.3rem;
+      display: none;
+    }
+
+    .form-input.invalid,
+    .form-select.invalid,
+    .form-textarea.invalid {
+      border-color: #e74c3c;
+    }
+
+    @media (max-width: 900px) {
+      .submit-main {
+        grid-template-columns: 1fr;
+        padding: 2rem 1.5rem;
+      }
+      .page-hero { padding: 3rem 1.5rem 2rem; }
+    }
+  </style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- ── Header ── -->
+<header class="site-header">
+  <img src="image/law-firm-logo.jpg" alt="Law Firm Connect" class="logo" width="60" height="60"
+    onerror="this.style.display='none'"/>
+  <div>
+    <h1>Law Firm Connect</h1>
+    <p>Connecting Clients and Lawyers Seamlessly</p>
+  </div>
+</header>
+
+<!-- ── Nav ── -->
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="index.html">Home</a>
+    <div class="nav-dropdown">
+      <a href="cases.html" class="active">Cases &#9662;</a>
+      <ul class="nav-dropdown-menu">
+        <li><a href="cases.html">Available Cases</a></li>
+        <li><a href="my-cases.html">My Cases</a></li>
+        <li><a href="submit-case.html">Submit a Case</a></li>
+      </ul>
+    </div>
+    <a href="lawyers.html">Lawyers</a>
+    <a href="news.html">News &amp; Insights</a>
+    <a href="about.html">About Us</a>
+    <a href="login.html" class="nav-login-link" id="nav-auth-btn">Login</a>
+  </div>
+</nav>
+
+<!-- ── Page Hero ── -->
+<div class="page-hero reveal">
+  <p class="section-eyebrow">New Filing</p>
+  <h2 class="section-heading">Submit a <span>Case</span></h2>
+  <p style="color:var(--muted);margin-top:0.7rem;font-size:0.95rem;max-width:520px;">
+    Describe your legal matter clearly. A qualified lawyer will review and accept your case.
+  </p>
+</div>
+
+<!-- ── Main ── -->
+<main class="submit-main">
+
+  <!-- Form -->
+  <div class="form-card reveal">
+
+    <!-- Form view -->
+    <div id="form-view">
+      <span class="form-section-label">Case Details</span>
+
+      <div class="form-group">
+        <label class="form-label" for="case-title">Case Title <span style="color:var(--red-alert)">*</span></label>
+        <input type="text" id="case-title" class="form-input" placeholder="e.g. Property boundary dispute in Pune" maxlength="120"/>
+        <div class="field-error" id="err-title">Please enter a case title.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="case-area">Legal Area <span style="color:var(--red-alert)">*</span></label>
+        <select id="case-area" class="form-select">
+          <option value="" disabled selected>Select the relevant area of law…</option>
+          <option value="Civil Law">Civil Law</option>
+          <option value="Criminal Law">Criminal Law</option>
+          <option value="Family Law">Family Law</option>
+          <option value="Corporate Law">Corporate Law</option>
+          <option value="Intellectual Property">Intellectual Property</option>
+          <option value="Real Estate">Real Estate</option>
+          <option value="Labour & Employment">Labour &amp; Employment</option>
+          <option value="Tax Law">Tax Law</option>
+          <option value="Consumer Protection">Consumer Protection</option>
+          <option value="Constitutional Law">Constitutional Law</option>
+          <option value="Immigration">Immigration</option>
+          <option value="Cyber Law">Cyber Law</option>
+          <option value="Other">Other</option>
+        </select>
+        <div class="field-error" id="err-area">Please select a legal area.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="case-desc">Case Description <span style="color:var(--red-alert)">*</span></label>
+        <textarea id="case-desc" class="form-textarea" placeholder="Describe the background, key facts, and what outcome you are seeking. Be as specific as possible." maxlength="1000"></textarea>
+        <div class="char-counter" id="desc-counter">0 / 1000</div>
+        <div class="field-error" id="err-desc">Please describe your case (minimum 30 characters).</div>
+      </div>
+
+      <hr class="form-divider"/>
+
+      <span class="form-section-label">Contact Information</span>
+
+      <div class="form-group">
+        <label class="form-label" for="case-contact">Your Contact Details <span style="color:var(--red-alert)">*</span></label>
+        <input type="text" id="case-contact" class="form-input" placeholder="Phone number or preferred email for lawyer to reach you"/>
+        <div class="field-error" id="err-contact">Please provide contact details.</div>
+      </div>
+
+      <hr class="form-divider"/>
+
+      <span class="form-section-label">Priority</span>
+
+      <label class="emergency-row" for="case-emergency">
+        <input type="checkbox" id="case-emergency"/>
+        <div>
+          <div class="emergency-label">&#128680; Mark as Emergency</div>
+          <div class="emergency-sub">Flag this case for immediate lawyer attention and priority matching.</div>
+        </div>
+      </label>
+
+      <button class="btn-submit" id="submit-btn" type="button">
+        <span id="submit-label">File Case &#8594;</span>
+      </button>
+    </div>
+
+    <!-- Success view -->
+    <div class="success-overlay" id="success-view">
+      <div class="success-icon">&#9878;&#65039;</div>
+      <div class="success-title">Case Filed Successfully</div>
+      <p class="success-sub">
+        Your case has been submitted to the platform.<br/>
+        A lawyer will review and accept it shortly.<br/>
+        You can track its status under <strong>My Cases</strong>.
+      </p>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;">
+        <a href="my-cases.html"><button class="btn-gold"><span>View My Cases</span></button></a>
+        <button class="btn-gold" id="submit-another-btn"><span>Submit Another</span></button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="info-sidebar">
+
+    <div class="info-card reveal">
+      <div class="info-card-title">How it works</div>
+      <div class="info-step">
+        <div class="step-num">1</div>
+        <div class="step-text"><strong>You file the case</strong><br/>Fill in the details of your legal matter and submit.</div>
+      </div>
+      <div class="info-step">
+        <div class="step-num">2</div>
+        <div class="step-text"><strong>A lawyer accepts it</strong><br/>Qualified lawyers browse open cases and accept those matching their expertise.</div>
+      </div>
+      <div class="info-step">
+        <div class="step-num">3</div>
+        <div class="step-text"><strong>Case goes to pending</strong><br/>Once accepted, your case status updates in real time and you can message your lawyer directly.</div>
+      </div>
+      <div class="info-step">
+        <div class="step-num">4</div>
+        <div class="step-text"><strong>Resolution & closure</strong><br/>The lawyer files a judgment and closes the case when the matter is resolved.</div>
+      </div>
+    </div>
+
+    <div class="info-card reveal">
+      <div class="info-card-title">Practice Areas</div>
+      <div class="area-list">
+        <span class="area-tag">Civil Law</span>
+        <span class="area-tag">Criminal Law</span>
+        <span class="area-tag">Family Law</span>
+        <span class="area-tag">Corporate</span>
+        <span class="area-tag">IP</span>
+        <span class="area-tag">Real Estate</span>
+        <span class="area-tag">Labour</span>
+        <span class="area-tag">Tax Law</span>
+        <span class="area-tag">Consumer</span>
+        <span class="area-tag">Constitutional</span>
+        <span class="area-tag">Immigration</span>
+        <span class="area-tag">Cyber Law</span>
+      </div>
+    </div>
+
+    <div class="info-card reveal" style="border-color:rgba(192,57,43,0.3);">
+      <div class="info-card-title" style="color:#e74c3c;">Emergency Cases</div>
+      <p style="color:var(--muted);font-size:0.85rem;line-height:1.6;">
+        Mark a case as Emergency if the matter involves immediate risk to life, liberty, or property.
+        Emergency cases are flagged prominently and receive priority assignment.
+      </p>
+    </div>
+
+  </aside>
+
+</main>
+
+<!-- ── Footer ── -->
+<footer class="site-footer">
+  <p>&copy; <span id="year"></span> Law Firm Connect. All Rights Reserved.</p>
+</footer>
+
+<!-- Toast -->
+<div class="toast-msg" id="toast"></div>
+
+<script>
+  // ── Cursor ──
+  const cur = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  document.addEventListener('mousemove', e => {
+    cur.style.left = e.clientX + 'px'; cur.style.top = e.clientY + 'px';
+    ring.style.left = e.clientX + 'px'; ring.style.top = e.clientY + 'px';
+  });
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // ── Scroll reveal ──
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  // ── Auth guard ──
+  const token = localStorage.getItem('token');
+  const role = localStorage.getItem('role');
+
+  if (!token) {
+    window.location.replace('login.html');
+  }
+
+  // Only customers can submit cases
+  if (token && role && role !== 'customer') {
+    document.getElementById('form-view').innerHTML = `
+      <div style="text-align:center;padding:3rem 1rem;">
+        <div style="font-size:2.5rem;margin-bottom:1rem;opacity:0.4;">&#9878;</div>
+        <div style="font-family:var(--font-display);font-size:1.4rem;color:var(--gold-light);margin-bottom:0.5rem;">Access Restricted</div>
+        <p style="color:var(--muted);font-size:0.9rem;margin-bottom:1.5rem;">
+          Only registered clients can submit cases.<br/>
+          You are logged in as <strong style="color:var(--white);">${role}</strong>.
+        </p>
+        <a href="cases.html"><button class="btn-gold"><span>Browse Cases</span></button></a>
+      </div>`;
+  }
+
+  // ── Nav auth button ──
+  const authBtn = document.getElementById('nav-auth-btn');
+  if (token && authBtn) {
+    authBtn.textContent = 'Logout';
+    authBtn.href = '#';
+    authBtn.addEventListener('click', e => {
+      e.preventDefault();
+      localStorage.clear();
+      window.location.replace('login.html');
+    });
+  }
+
+  // ── Char counter ──
+  const descEl = document.getElementById('case-desc');
+  const counter = document.getElementById('desc-counter');
+  descEl.addEventListener('input', () => {
+    const len = descEl.value.length;
+    counter.textContent = `${len} / 1000`;
+    counter.className = 'char-counter' + (len > 900 ? ' over' : len > 700 ? ' warn' : '');
+  });
+
+  // ── Toast ──
+  function showToast(msg, color = '#10b981') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.background = color;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  // ── Validation ──
+  function validate() {
+    let valid = true;
+
+    const fields = [
+      { id: 'case-title', err: 'err-title', check: v => v.trim().length > 3 },
+      { id: 'case-area',  err: 'err-area',  check: v => v !== '' },
+      { id: 'case-desc',  err: 'err-desc',  check: v => v.trim().length >= 30 },
+      { id: 'case-contact', err: 'err-contact', check: v => v.trim().length > 4 },
+    ];
+
+    fields.forEach(({ id, err, check }) => {
+      const el = document.getElementById(id);
+      const errEl = document.getElementById(err);
+      const ok = check(el.value);
+      el.classList.toggle('invalid', !ok);
+      errEl.style.display = ok ? 'none' : 'block';
+      if (!ok) valid = false;
+    });
+
+    return valid;
+  }
+
+  // Clear validation on input
+  ['case-title','case-area','case-desc','case-contact'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      document.getElementById(id).classList.remove('invalid');
+    });
+  });
+
+  // ── Submit ──
+  document.getElementById('submit-btn').addEventListener('click', async () => {
+    if (!validate()) return;
+
+    const btn = document.getElementById('submit-btn');
+    const label = document.getElementById('submit-label');
+
+    btn.disabled = true;
+    label.textContent = 'Filing…';
+
+    const payload = {
+      title:        document.getElementById('case-title').value.trim(),
+      area:         document.getElementById('case-area').value,
+      description:  document.getElementById('case-desc').value.trim(),
+      contact_info: document.getElementById('case-contact').value.trim(),
+      is_emergency: document.getElementById('case-emergency').checked,
+    };
+
+    try {
+      const res = await fetch('/api/cases', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Submission failed.');
+      }
+
+      // Show success state
+      document.getElementById('form-view').style.display = 'none';
+      document.getElementById('success-view').classList.add('show');
+
+    } catch (err) {
+      showToast(`❌ ${err.message}`, '#ef4444');
+      btn.disabled = false;
+      label.textContent = 'File Case →';
+    }
+  });
+
+  // ── Submit another ──
+  document.getElementById('submit-another-btn')?.addEventListener('click', () => {
+    document.getElementById('success-view').classList.remove('show');
+    document.getElementById('form-view').style.display = 'block';
+    document.getElementById('case-title').value = '';
+    document.getElementById('case-area').value = '';
+    document.getElementById('case-desc').value = '';
+    document.getElementById('case-contact').value = '';
+    document.getElementById('case-emergency').checked = false;
+    document.getElementById('desc-counter').textContent = '0 / 1000';
+  });
+</script>
+</body>
+</html>

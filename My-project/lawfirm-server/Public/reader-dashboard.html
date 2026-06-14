@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal Portal - Public Reader Board</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h2>Public Information Portal</h2>
+        <button onclick="logout()">Logout</button>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <h3>Latest Legal News</h3>
+            <div id="news-feed-container">Loading news...</div>
+        </section>
+
+        <section class="card">
+            <h3>Active & Ongoing Proceedings</h3>
+            <table border="1" width="100%">
+                <thead>
+                    <tr><th>Title</th><th>Legal Domain</th><th>Status</th></tr>
+                </thead>
+                <tbody id="ongoing-cases-table">
+                </tbody>
+            </table>
+        </section>
+
+        <section class="card">
+            <h3>Lawyer Performance Directory</h3>
+            <table border="1" width="100%">
+                <thead>
+                    <tr><th>Name</th><th>Specialization</th><th>Won</th><th>Lost</th></tr>
+                </thead>
+                <tbody id="leaderboard-table">
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="js/reader.js"></script>
+    <script>
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

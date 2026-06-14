@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lawyers — Law Firm Connect</title>
+  <link rel="stylesheet" href="css/styles.css"/>
+  <style>
+    /* ── Page Hero ── */
+    .page-hero {
+      padding: 5rem 4rem 3rem;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid var(--navy-border);
+    }
+    .page-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(201,168,76,0.05) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* FIX 3 — was inline style on line 526 */
+    .page-hero-sub {
+      color: var(--muted);
+      margin-top: 0.7rem;
+      font-size: 0.95rem;
+      max-width: 520px;
+    }
+
+    /* ── Main Layout ── */
+    .lawyers-main {
+      padding: 3rem 4rem;
+    }
+
+    /* ── Filter Bar ── */
+    .filter-bar {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+      align-items: center;
+    }
+
+    .filter-input {
+      flex: 1;
+      min-width: 220px;
+      background: var(--navy-card);
+      border: 1px solid var(--navy-border);
+      color: var(--white);
+      border-radius: 8px;
+      padding: 0.65rem 1rem;
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .filter-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+    }
+
+    .filter-input::placeholder { color: var(--muted); opacity: 0.7; }
+
+    .filter-select {
+      background: var(--navy-card);
+      border: 1px solid var(--navy-border);
+      color: var(--white);
+      border-radius: 8px;
+      padding: 0.65rem 1rem;
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      outline: none;
+      transition: all 0.3s ease;
+      min-width: 180px;
+    }
+
+    .filter-select:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+    }
+
+    .filter-select option { background: var(--navy-mid); }
+
+    .results-count {
+      font-size: 0.78rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      margin-left: auto;
+    }
+
+    /* ── Grid ── */
+    .lawyers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* ── Lawyer Card ── */
+    .lawyer-card {
+      background: var(--navy-card);
+      border: 1px solid var(--navy-border);
+      border-radius: 14px;
+      padding: 1.8rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.23,1,0.32,1);
+      transform-style: preserve-3d;
+      cursor: pointer;
+    }
+
+    .lawyer-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(201,168,76,0.05) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .lawyer-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(201,168,76,0.35);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.35), 0 0 0 1px rgba(201,168,76,0.1);
+    }
+
+    .lawyer-card:hover::before { opacity: 1; }
+
+    /* Avatar */
+    .lawyer-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--gold-dim);
+      border: 2px solid rgba(201,168,76,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--gold-light);
+      margin-bottom: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .lawyer-card-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .lawyer-name {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--gold-light);
+      margin-bottom: 0.2rem;
+    }
+
+    .lawyer-specialization {
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.8;
+    }
+
+    /* Stats row */
+    .lawyer-stats {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--navy-border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 1.2rem;
+    }
+
+    .stat-box {
+      flex: 1;
+      text-align: center;
+      padding: 0.6rem 0.4rem;
+      border-right: 1px solid var(--navy-border);
+    }
+
+    .stat-box:last-child { border-right: none; }
+
+    .stat-box-num {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--white);
+      display: block;
+      line-height: 1;
+    }
+
+    .stat-box-num.wins { color: var(--green-ok); }
+    .stat-box-num.losses { color: var(--red-alert); }
+
+    .stat-box-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 0.2rem;
+      display: block;
+    }
+
+    /* Win rate bar */
+    .win-rate-bar {
+      margin-bottom: 1.2rem;
+    }
+
+    .win-rate-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .win-rate-track {
+      height: 4px;
+      background: var(--navy-border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .win-rate-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green-ok), var(--gold));
+      border-radius: 2px;
+      transition: width 1s cubic-bezier(0.23,1,0.32,1);
+    }
+
+    /* Email */
+    .lawyer-email {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* Card footer */
+    .lawyer-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--navy-border);
+      padding-top: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .availability-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green-ok);
+      display: inline-block;
+      margin-right: 0.4rem;
+      box-shadow: 0 0 6px var(--green-ok);
+    }
+
+    .availability-text {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .btn-contact {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gold);
+      background: transparent;
+      border: 1px solid rgba(201,168,76,0.3);
+      padding: 5px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-contact:hover {
+      background: rgba(201,168,76,0.1);
+      border-color: var(--gold);
+    }
+
+    /* ── Leaderboard banner ── */
+    .leaderboard-section {
+      background: var(--navy-card);
+      border: 1px solid var(--navy-border);
+      border-top: 2px solid var(--gold);
+      border-radius: 14px;
+      padding: 2rem 2.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .leaderboard-title {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--gold-light);
+      margin-bottom: 1.2rem;
+    }
+
+    .leaderboard-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .leaderboard-table th {
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: left;
+      padding: 0.5rem 1rem;
+      border-bottom: 1px solid var(--navy-border);
+    }
+
+    .leaderboard-table td {
+      padding: 0.75rem 1rem;
+      font-size: 0.88rem;
+      color: var(--white);
+      border-bottom: 1px solid rgba(30,42,64,0.5);
+    }
+
+    .leaderboard-table tr:last-child td { border-bottom: none; }
+
+    .leaderboard-table tr:hover td { background: rgba(201,168,76,0.03); }
+
+    .rank-num {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .rank-num.gold-rank { color: #ffd700; }
+    .rank-num.silver-rank { color: #c0c0c0; }
+    .rank-num.bronze-rank { color: #cd7f32; }
+
+    /* FIX 4 — was inline styles inside leaderboard JS-rendered rows (line 503) */
+    .lb-spec-cell  { color: var(--muted); }
+    .lb-won-cell   { color: var(--green-ok); font-weight: 600; }
+    .lb-lost-cell  { color: var(--red-alert); font-weight: 600; }
+    .lb-rate-wrap  { display: flex; align-items: center; gap: 0.6rem; }
+    .lb-rate-track { flex: 1; height: 4px; background: var(--navy-border); border-radius: 2px; min-width: 60px; }
+    .lb-rate-fill  { height: 100%; background: linear-gradient(90deg, var(--green-ok), var(--gold)); border-radius: 2px; }
+    .lb-rate-pct   { font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+
+    /* ── Empty / Loading states ── */
+    .state-msg {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--muted);
+      grid-column: 1 / -1;
+    }
+
+    .state-msg-icon {
+      font-size: 2.5rem;
+      display: block;
+      margin-bottom: 1rem;
+      opacity: 0.25;
+    }
+
+    /* FIX 1 — backdrop-filter: -webkit- prefix MUST come before the standard property */
+    /* ── Contact modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5,8,20,0.85);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-box {
+      background: var(--navy-card);
+      border: 1px solid var(--navy-border);
+      border-top: 2px solid var(--gold);
+      border-radius: 14px;
+      padding: 2.5rem;
+      width: min(480px, 90vw);
+      transform: translateY(30px) scale(0.96);
+      transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
+    }
+
+    .modal-overlay.open .modal-box {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--gold-light);
+      margin-bottom: 0.4rem;
+    }
+
+    .modal-sub {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-field {
+      margin-bottom: 1rem;
+    }
+
+    .modal-label {
+      display: block;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .modal-input, .modal-textarea {
+      width: 100%;
+      background: var(--navy);
+      border: 1px solid var(--navy-border);
+      color: var(--white);
+      border-radius: 8px;
+      padding: 0.65rem 1rem;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .modal-input:focus, .modal-textarea:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+    }
+
+    .modal-textarea { resize: vertical; min-height: 90px; }
+
+    .modal-footer {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 1.5rem;
+    }
+
+    .btn-modal-close {
+      background: transparent;
+      border: 1px solid var(--navy-border);
+      color: var(--muted);
+      padding: 0.6rem 1.4rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+    }
+
+    .btn-modal-close:hover { color: var(--white); border-color: var(--muted); }
+
+    @media (max-width: 768px) {
+      .lawyers-main { padding: 2rem 1.5rem; }
+      .page-hero { padding: 3rem 1.5rem 2rem; }
+      .leaderboard-section { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- ── Header ── -->
+<header class="site-header">
+  <img src="image/law-firm-logo.jpg" alt="Law Firm Connect" class="logo" width="60" height="60"
+    onerror="this.style.display='none'"/>
+  <div>
+    <h1>Law Firm Connect</h1>
+    <p>Connecting Clients and Lawyers Seamlessly</p>
+  </div>
+</header>
+
+<!-- ── Nav ── -->
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="index.html">Home</a>
+    <div class="nav-dropdown">
+      <a href="cases.html">Cases &#9662;</a>
+      <ul class="nav-dropdown-menu">
+        <li><a href="cases.html">Available Cases</a></li>
+        <li><a href="my-cases.html">My Cases</a></li>
+        <li><a href="submit-case.html">Submit a Case</a></li>
+      </ul>
+    </div>
+    <a href="lawyers.html" class="active">Lawyers</a>
+    <a href="news.html">News &amp; Insights</a>
+    <a href="about.html">About Us</a>
+    <a href="login.html" class="nav-login-link" id="nav-auth-btn">Login</a>
+  </div>
+</nav>
+
+<!-- ── Page Hero ── -->
+<div class="page-hero reveal">
+  <p class="section-eyebrow">Legal Directory</p>
+  <h2 class="section-heading">Our <span>Lawyers</span></h2>
+  <!-- FIX 3: was style="color:var(--muted);margin-top:0.7rem;font-size:0.95rem;max-width:520px;" -->
+  <p class="page-hero-sub">
+    Browse verified legal professionals by specialization. Track their performance and connect directly.
+  </p>
+</div>
+
+<!-- ── Main ── -->
+<main class="lawyers-main">
+
+  <!-- Leaderboard -->
+  <div class="leaderboard-section reveal">
+    <div class="leaderboard-title">&#127942; Performance Leaderboard</div>
+    <table class="leaderboard-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Lawyer</th>
+          <th>Specialization</th>
+          <th>Won</th>
+          <th>Lost</th>
+          <th>Win Rate</th>
+        </tr>
+      </thead>
+      <!-- FIX 4: loading row no longer uses inline style — uses .lb-loading-cell class -->
+      <tbody id="leaderboard-body">
+        <tr><td colspan="6" class="lb-loading-cell">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar reveal">
+    <input type="text" id="searchLawyer" class="filter-input" placeholder="Search by name or specialization…"/>
+    <!-- FIX 2: added aria-label for accessible name -->
+    <select id="filterSpec" class="filter-select" aria-label="Filter by specialization">
+      <option value="">All Specializations</option>
+      <option value="Civil Law">Civil Law</option>
+      <option value="Criminal Law">Criminal Law</option>
+      <option value="Family Law">Family Law</option>
+      <option value="Corporate Law">Corporate Law</option>
+      <option value="Intellectual Property">Intellectual Property</option>
+      <option value="Real Estate">Real Estate</option>
+      <option value="Labour & Employment">Labour &amp; Employment</option>
+      <option value="Tax Law">Tax Law</option>
+      <option value="Consumer Protection">Consumer Protection</option>
+      <option value="Constitutional Law">Constitutional Law</option>
+      <option value="Cyber Law">Cyber Law</option>
+    </select>
+    <span class="results-count" id="results-count"></span>
+  </div>
+
+  <!-- Grid -->
+  <div class="lawyers-grid" id="lawyersGrid">
+    <div class="state-msg">
+      <span class="state-msg-icon">⚖</span>
+      Loading lawyers…
+    </div>
+  </div>
+
+</main>
+
+<!-- ── Footer ── -->
+<footer class="site-footer">
+  <p>&copy; <span id="year"></span> Law Firm Connect. All Rights Reserved.</p>
+</footer>
+
+<!-- ── Contact Modal ── -->
+<div class="modal-overlay" id="contactModal">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-lawyer-name">Contact Lawyer</div>
+    <div class="modal-sub" id="modal-lawyer-spec"></div>
+    <div class="modal-field">
+      <label class="modal-label" for="modal-sender-name">Your Name</label>
+      <input type="text" class="modal-input" id="modal-sender-name" placeholder="Your full name"/>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label" for="modal-sender-email">Your Email</label>
+      <input type="email" class="modal-input" id="modal-sender-email" placeholder="your@email.com"/>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label" for="modal-message">Message</label>
+      <textarea class="modal-textarea" id="modal-message" placeholder="Briefly describe your legal matter…"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-close" id="modal-close-btn">Cancel</button>
+      <button class="btn-gold" id="modal-send-btn"><span>Send Message</span></button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Cursor ──
+  const cur = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  document.addEventListener('mousemove', e => {
+    cur.style.left = e.clientX + 'px'; cur.style.top = e.clientY + 'px';
+    ring.style.left = e.clientX + 'px'; ring.style.top = e.clientY + 'px';
+  });
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // ── Reveal ──
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  // ── Auth ──
+  const token = localStorage.getItem('token');
+  if (!token) window.location.replace('login.html');
+
+  const authBtn = document.getElementById('nav-auth-btn');
+  if (token && authBtn) {
+    authBtn.textContent = 'Logout';
+    authBtn.href = '#';
+    authBtn.addEventListener('click', e => {
+      e.preventDefault();
+      localStorage.clear();
+      window.location.replace('login.html');
+    });
+  }
+
+  // ── Data ──
+  let allLawyers = [];
+
+  // ── Helpers ──
+  function getInitials(name) {
+    return (name || 'L').split(' ').filter(Boolean).map(w => w[0]).slice(0,2).join('').toUpperCase();
+  }
+
+  function winRate(won, lost) {
+    const total = won + lost;
+    return total === 0 ? 0 : Math.round((won / total) * 100);
+  }
+
+  // ── Render leaderboard ──
+  // FIX 4: all inline styles replaced with CSS classes (lb-spec-cell, lb-won-cell, etc.)
+  function renderLeaderboard(lawyers) {
+    const sorted = [...lawyers].sort((a,b) => b.cases_won - a.cases_won).slice(0, 5);
+    const rankClass = ['gold-rank','silver-rank','bronze-rank'];
+    document.getElementById('leaderboard-body').innerHTML = sorted.map((l, i) => {
+      const rate = winRate(l.cases_won, l.cases_lost);
+      return `
+        <tr>
+          <td><span class="rank-num ${rankClass[i] || ''}">${i + 1}</span></td>
+          <td><strong>${l.name || 'Unknown'}</strong></td>
+          <td class="lb-spec-cell">${l.specialization || 'General Practice'}</td>
+          <td class="lb-won-cell">${l.cases_won || 0}</td>
+          <td class="lb-lost-cell">${l.cases_lost || 0}</td>
+          <td>
+            <div class="lb-rate-wrap">
+              <div class="lb-rate-track">
+                <div class="lb-rate-fill" style="width:${rate}%"></div>
+              </div>
+              <span class="lb-rate-pct">${rate}%</span>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  // ── Render cards ──
+  function renderCards(lawyers) {
+    const grid = document.getElementById('lawyersGrid');
+    const query = document.getElementById('searchLawyer').value.toLowerCase();
+    const spec  = document.getElementById('filterSpec').value;
+
+    const filtered = lawyers.filter(l => {
+      const nameMatch = (l.name || '').toLowerCase().includes(query);
+      const specMatch = (l.specialization || '').toLowerCase().includes(query);
+      const specFilter = !spec || l.specialization === spec;
+      return (nameMatch || specMatch) && specFilter;
+    });
+
+    document.getElementById('results-count').textContent =
+      `${filtered.length} lawyer${filtered.length !== 1 ? 's' : ''} found`;
+
+    if (!filtered.length) {
+      grid.innerHTML = `<div class="state-msg"><span class="state-msg-icon">⚖</span>No lawyers match your search.</div>`;
+      return;
+    }
+
+    grid.innerHTML = filtered.map(l => {
+      const rate = winRate(l.cases_won || 0, l.cases_lost || 0);
+      const initials = getInitials(l.name);
+      return `
+        <div class="lawyer-card reveal" data-id="${l.id}">
+          <div class="lawyer-card-header">
+            <div class="lawyer-avatar">${initials}</div>
+            <div>
+              <div class="lawyer-name">${l.name || 'Anonymous Advocate'}</div>
+              <div class="lawyer-specialization">${l.specialization || 'General Practice'}</div>
+            </div>
+          </div>
+
+          <div class="lawyer-stats">
+            <div class="stat-box">
+              <span class="stat-box-num wins">${l.cases_won || 0}</span>
+              <span class="stat-box-label">Won</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box-num losses">${l.cases_lost || 0}</span>
+              <span class="stat-box-label">Lost</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-box-num">${(l.cases_won||0) + (l.cases_lost||0)}</span>
+              <span class="stat-box-label">Total</span>
+            </div>
+          </div>
+
+          <div class="win-rate-bar">
+            <div class="win-rate-label">
+              <span>Win Rate</span>
+              <span>${rate}%</span>
+            </div>
+            <div class="win-rate-track">
+              <div class="win-rate-fill" style="width:${rate}%"></div>
+            </div>
+          </div>
+
+          ${l.email ? `
+          <div class="lawyer-email">
+            <span style="opacity:0.5">&#9993;</span>
+            ${l.email}
+          </div>` : ''}
+
+          <div class="lawyer-card-footer">
+            <div>
+              <span class="availability-dot"></span>
+              <span class="availability-text">Available</span>
+            </div>
+            <button class="btn-contact" onclick="openContactModal(${JSON.stringify(l).replace(/"/g,'&quot;')})">
+              Contact
+            </button>
+          </div>
+        </div>`;
+    }).join('');
+
+    grid.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+  }
+
+  // ── Load data ──
+  async function loadLawyers() {
+    const grid = document.getElementById('lawyersGrid');
+    try {
+      const res = await fetch('/api/reader/dashboard', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+
+      const data = await res.json();
+      allLawyers = data.leaderboard || [];
+
+      if (!allLawyers.length) {
+        document.getElementById('leaderboard-body').innerHTML =
+          '<tr><td colspan="6" class="lb-loading-cell">No lawyers registered yet.</td></tr>';
+        grid.innerHTML =
+          '<div class="state-msg"><span class="state-msg-icon">⚖</span>No lawyers are registered on the platform yet.</div>';
+        return;
+      }
+
+      renderLeaderboard(allLawyers);
+      renderCards(allLawyers);
+
+    } catch (err) {
+      console.error('Failed to load lawyers:', err);
+      grid.innerHTML =
+        '<div class="state-msg"><span class="state-msg-icon">⚠️</span>Failed to load lawyer data. Check your server connection.</div>';
+    }
+  }
+
+  loadLawyers();
+
+  // ── Filters ──
+  document.getElementById('searchLawyer').addEventListener('input', () => renderCards(allLawyers));
+  document.getElementById('filterSpec').addEventListener('change', () => renderCards(allLawyers));
+
+  // ── Contact Modal ──
+  let selectedLawyer = null;
+
+  function openContactModal(lawyer) {
+    selectedLawyer = lawyer;
+    document.getElementById('modal-lawyer-name').textContent = `Contact ${lawyer.name}`;
+    document.getElementById('modal-lawyer-spec').textContent = lawyer.specialization || 'General Practice';
+    const email = localStorage.getItem('userEmail') || '';
+    document.getElementById('modal-sender-email').value = email;
+    document.getElementById('contactModal').classList.add('open');
+  }
+
+  document.getElementById('modal-close-btn').addEventListener('click', () => {
+    document.getElementById('contactModal').classList.remove('open');
+  });
+
+  document.getElementById('contactModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('contactModal')) {
+      document.getElementById('contactModal').classList.remove('open');
+    }
+  });
+
+  document.getElementById('modal-send-btn').addEventListener('click', () => {
+    const name    = document.getElementById('modal-sender-name').value.trim();
+    const email   = document.getElementById('modal-sender-email').value.trim();
+    const message = document.getElementById('modal-message').value.trim();
+
+    if (!name || !email || !message) {
+      alert('Please fill in all fields.');
+      return;
+    }
+
+    document.getElementById('contactModal').classList.remove('open');
+    document.getElementById('modal-sender-name').value = '';
+    document.getElementById('modal-message').value = '';
+
+    const toast = document.createElement('div');
+    toast.className = 'send-toast';
+    toast.textContent = `✅ Message sent to ${selectedLawyer?.name || 'lawyer'}.`;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.opacity='0'; setTimeout(()=>toast.remove(),300); }, 3000);
+  });
+</script>
+</body>
+</html>

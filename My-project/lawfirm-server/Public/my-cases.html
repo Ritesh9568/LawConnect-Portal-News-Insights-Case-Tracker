@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Cases — Law Firm Connect</title>
+  <link rel="stylesheet" href="css/styles.css"/>
+  <style>
+    .page-hero { padding:5rem 4rem 3rem; border-bottom:1px solid var(--navy-border); position:relative; overflow:hidden; }
+    .page-hero::after { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 60% 80% at 80% 50%, rgba(201,168,76,0.05) 0%, transparent 60%); pointer-events:none; }
+
+    .my-cases-main { padding:3rem 4rem; }
+
+    /* ── Tabs ── */
+    .tab-bar { display:flex; gap:0; border-bottom:1px solid var(--navy-border); margin-bottom:2.5rem; }
+    .tab-btn {
+      background:transparent; border:none; border-bottom:2px solid transparent;
+      color:var(--muted); font-family:var(--font-body); font-size:0.82rem;
+      font-weight:600; letter-spacing:0.1em; text-transform:uppercase;
+      padding:0.9rem 1.6rem; cursor:pointer; transition:all 0.3s ease;
+    }
+    .tab-btn:hover { color:var(--gold-light); }
+    .tab-btn.active { color:var(--gold-light); border-bottom-color:var(--gold); }
+
+    /* ── Layout: sidebar + panel ── */
+    .cases-layout { display:grid; grid-template-columns:320px 1fr; gap:2rem; min-height:60vh; }
+    .cases-sidebar { display:flex; flex-direction:column; gap:1rem; }
+
+    .sidebar-card {
+      background:var(--navy-card); border:1px solid var(--navy-border); border-radius:12px;
+      padding:1.2rem 1.4rem; cursor:pointer; transition:all 0.35s cubic-bezier(0.23,1,0.32,1);
+    }
+    .sidebar-card:hover { border-color:rgba(201,168,76,0.3); transform:translateX(4px); }
+    .sidebar-card.selected { border-color:var(--gold); background:rgba(201,168,76,0.06); }
+    .sidebar-card-title { font-family:var(--font-display); font-size:1.1rem; font-weight:600; color:var(--gold-light); margin-bottom:0.25rem; }
+    .sidebar-card-sub { font-size:0.78rem; color:var(--muted); }
+
+    /* ── Detail panel ── */
+    .detail-panel {
+      background:var(--navy-card); border:1px solid var(--navy-border); border-radius:14px;
+      padding:2rem; min-height:500px;
+    }
+    .detail-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; height:400px; color:var(--muted); }
+    .detail-empty-icon { font-size:3rem; margin-bottom:1rem; opacity:0.25; }
+
+    .detail-header { margin-bottom:2rem; padding-bottom:1.5rem; border-bottom:1px solid var(--navy-border); }
+    .detail-title { font-family:var(--font-display); font-size:1.8rem; font-weight:600; color:var(--gold-light); margin-bottom:0.5rem; }
+    .detail-meta { display:flex; gap:0.8rem; flex-wrap:wrap; align-items:center; }
+
+    /* ── Timeline ── */
+    .timeline { position:relative; padding-left:2rem; }
+    .timeline::before { content:''; position:absolute; left:0; top:6px; bottom:0; width:1px; background:var(--navy-border); }
+    .timeline-item { position:relative; margin-bottom:1.8rem; }
+    .timeline-dot {
+      width:11px; height:11px; border-radius:50%;
+      background:var(--gold); border:2px solid var(--navy-card);
+      position:absolute; left:-2rem; top:4px; transform:translateX(-50%);
+    }
+    .timeline-dot.done { background:var(--green-ok); }
+    .timeline-dot.pending { background:var(--navy-border); border-color:var(--muted); }
+    .timeline-when { font-size:0.72rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:0.2rem; }
+    .timeline-text { font-size:0.9rem; color:var(--white); }
+    .timeline-note { font-size:0.82rem; color:var(--muted); margin-top:0.2rem; }
+
+    /* ── Messaging ── */
+    .messages-panel { margin-top:2rem; }
+    .messages-title { font-size:0.78rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--gold); margin-bottom:1rem; }
+    .messages-scroll { max-height:240px; overflow-y:auto; display:flex; flex-direction:column; gap:0.6rem; margin-bottom:1rem; padding:0.5rem 0; }
+    .msg-bubble {
+      padding:0.6rem 1rem; border-radius:10px; max-width:75%; font-size:0.88rem; line-height:1.5;
+    }
+    .msg-them { background:var(--navy); color:var(--white); border:1px solid var(--navy-border); align-self:flex-start; border-bottom-left-radius:2px; }
+    .msg-me { background:var(--gold-dim); border:1px solid rgba(201,168,76,0.25); color:var(--gold-light); align-self:flex-end; border-bottom-right-radius:2px; }
+    .msg-sender { font-size:0.7rem; color:var(--muted); margin-bottom:2px; }
+    .msg-compose { display:flex; gap:0.8rem; }
+    .msg-input {
+      flex:1; background:var(--navy); border:1px solid var(--navy-border); color:var(--white);
+      border-radius:8px; padding:0.6rem 1rem; font-family:var(--font-body); font-size:0.9rem; outline:none;
+      transition:all 0.3s ease;
+    }
+    .msg-input:focus { border-color:var(--gold); }
+    .msg-send { background:var(--gold); border:none; color:var(--navy); font-weight:700; padding:0 1.2rem; border-radius:8px; cursor:pointer; font-size:1.1rem; transition:all 0.3s ease; }
+    .msg-send:hover { background:var(--gold-light); }
+
+    @media(max-width:900px){
+      .cases-layout { grid-template-columns:1fr; }
+      .page-hero, .my-cases-main { padding-left:1.5rem; padding-right:1.5rem; }
+    }
+  </style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- ── Header ── -->
+<header class="site-header">
+  <img src="image/law-firm-logo.jpg" alt="Law Firm Connect" class="logo" width="60" height="60"
+    onerror="this.style.display='none'"/>
+  <div>
+    <h1>Law Firm Connect</h1>
+    <p>Connecting Clients and Lawyers Seamlessly</p>
+  </div>
+</header>
+
+<!-- ── Nav ── -->
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="index.html">Home</a>
+    <div class="nav-dropdown">
+      <a href="cases.html" class="active">Cases ▾</a>
+      <ul class="nav-dropdown-menu">
+        <li><a href="cases.html">Available Cases</a></li>
+        <li><a href="my-cases.html">My Cases</a></li>
+        <li><a href="submit-case.html">Submit a Case</a></li>
+      </ul>
+    </div>
+    <a href="lawyers.html">Lawyers</a>
+    <a href="news.html">News & Insights</a>
+    <a href="about.html">About Us</a>
+    <a href="login.html" style="margin-left:auto; color:var(--gold);">Login</a>
+  </div>
+</nav>
+
+<!-- ── Page Hero ── -->
+<div class="page-hero">
+  <p class="section-eyebrow">Your Dashboard</p>
+  <h2 class="section-heading">My <span>Cases</span></h2>
+  <p style="color:var(--muted);margin-top:0.7rem;font-size:0.95rem;">Track your assigned legal matters, view status history, and message your lawyer directly.</p>
+</div>
+
+<!-- ── Main ── -->
+<main class="my-cases-main">
+  <!-- Tabs -->
+  <div class="tab-bar reveal">
+    <button class="tab-btn active" data-tab="all">All Cases</button>
+    <button class="tab-btn" data-tab="ongoing">Ongoing</button>
+    <button class="tab-btn" data-tab="available">Available</button>
+    <button class="tab-btn" data-tab="finished">Finished</button>
+  </div>
+
+  <div class="cases-layout">
+    <!-- Sidebar list -->
+    <div class="cases-sidebar" id="casesSidebar">
+      <div class="state-msg">Loading…</div>
+    </div>
+
+    <!-- Detail panel -->
+    <div class="detail-panel" id="detailPanel">
+      <div class="detail-empty">
+        <div class="detail-empty-icon">⚖</div>
+        <p>Select a case to view details</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ── Footer ── -->
+<footer class="site-footer">
+  <p>&copy; <span id="year"></span> Law Firm Connect. All Rights Reserved.</p>
+</footer>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+  // Cursor
+  const cur = document.getElementById('cursor'), ring = document.getElementById('cursor-ring');
+  document.addEventListener('mousemove', e => {
+    cur.style.left=e.clientX+'px'; cur.style.top=e.clientY+'px';
+    ring.style.left=e.clientX+'px'; ring.style.top=e.clientY+'px';
+  });
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Reveal
+  const obs = new IntersectionObserver(e => e.forEach(x => { if(x.isIntersecting){ x.target.classList.add('visible'); obs.unobserve(x.target); }}), {threshold:0.08});
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  // ── Data ──
+  let allCases = [], activeTab = 'all', selectedId = null;
+
+  function getDummy() {
+    return [
+      {id:1,title:'Property Boundary Dispute',area:'Civil Law',status:'ongoing',is_emergency:false,description:'Disagreement over boundary between properties in Sangli.',lawyer:'Adv. Priya Sharma',created_at:'2025-01-10',messages:[{from:'Lawyer',text:'I have reviewed your documents. We need to schedule a survey.',time:'Jan 14'},{from:'Me',text:'When can the survey happen? This is urgent.',time:'Jan 14'},{from:'Lawyer',text:'I will coordinate with the surveyor and revert by Monday.',time:'Jan 15'}],timeline:[{date:'Jan 10',label:'Case Submitted',note:'Client submitted case documents',done:true},{date:'Jan 12',label:'Lawyer Assigned',note:'Adv. Priya Sharma assigned',done:true},{date:'Jan 14',label:'Documents Reviewed',note:'Initial review completed',done:true},{date:'Pending',label:'Survey Scheduled',note:'Land survey to be arranged',done:false},{date:'Pending',label:'Hearing',note:'Court hearing scheduled',done:false}]},
+      {id:2,title:'Child Custody Hearing',area:'Family Law',status:'available',is_emergency:true,description:'Urgent custody determination following divorce proceedings.',lawyer:null,created_at:'2025-02-03',messages:[],timeline:[{date:'Feb 3',label:'Case Filed',note:'Emergency case submitted',done:true},{date:'Pending',label:'Lawyer Assignment',note:'Awaiting assignment',done:false}]},
+      {id:3,title:'IP Trademark Infringement',area:'Intellectual Property',status:'finished',is_emergency:false,description:'Unauthorized use of registered trademark resolved.',lawyer:'Adv. Rajan Mehta',created_at:'2024-11-01',messages:[{from:'Lawyer',text:'The opposing party has agreed to a settlement.',time:'Dec 20'},{from:'Me',text:'What are the settlement terms?',time:'Dec 20'},{from:'Lawyer',text:'They will cease use and pay ₹2.5 lakh in damages.',time:'Dec 21'}],timeline:[{date:'Nov 1',label:'Case Filed',note:'Trademark infringement noticed',done:true},{date:'Nov 8',label:'Lawyer Assigned',note:'Adv. Rajan Mehta assigned',done:true},{date:'Dec 10',label:'Cease Notice Sent',note:'Legal notice dispatched',done:true},{date:'Dec 20',label:'Settlement Negotiated',done:true},{date:'Dec 22',label:'Case Closed',note:'Settled out of court',done:true}]},
+    ];
+  }
+
+  // ── Render sidebar ──
+  function statusBadge(s) {
+    const map = {available:'badge-available',ongoing:'badge-ongoing',submitted:'badge-submitted',finished:'badge-finished'};
+    return `<span class="badge-status ${map[s?.toLowerCase()]||'badge-submitted'}">${s||'Unknown'}</span>`;
+  }
+  function renderSidebar() {
+    const sidebar = document.getElementById('casesSidebar');
+    const filtered = allCases.filter(c => activeTab==='all' || (c.status||'').toLowerCase()===activeTab);
+    if(!filtered.length) { sidebar.innerHTML = '<div class="state-msg">No cases in this category.</div>'; return; }
+    sidebar.innerHTML = filtered.map(c => `
+      <div class="sidebar-card ${c.id===selectedId?'selected':''} reveal" data-id="${c.id}">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem">
+          ${statusBadge(c.status)}
+          ${c.is_emergency?'<span class="badge-status badge-emergency">Emergency</span>':''}
+        </div>
+        <div class="sidebar-card-title">${c.title}</div>
+        <div class="sidebar-card-sub">${c.area||'General'} · ${c.lawyer||'Unassigned'}</div>
+      </div>`).join('');
+    sidebar.querySelectorAll('.sidebar-card').forEach(el => {
+      obs.observe(el);
+      el.addEventListener('click', () => selectCase(+el.dataset.id));
+    });
+  }
+
+  // ── Render detail ──
+  function selectCase(id) {
+    selectedId = id;
+    renderSidebar();
+    const c = allCases.find(x => x.id===id);
+    if(!c) return;
+    const panel = document.getElementById('detailPanel');
+    panel.innerHTML = `
+      <div class="detail-header">
+        <div class="detail-title">${c.title}</div>
+        <div class="detail-meta">
+          ${statusBadge(c.status)}
+          ${c.is_emergency?'<span class="badge-status badge-emergency">Emergency</span>':''}
+          <span style="font-size:0.8rem;color:var(--muted)">${c.area||'General Law'}</span>
+          ${c.lawyer?`<span style="font-size:0.8rem;color:var(--muted)">· ${c.lawyer}</span>`:'<span style="font-size:0.8rem;color:var(--red-alert)">· No lawyer assigned</span>'}
+        </div>
+        <p style="color:var(--muted);font-size:0.9rem;margin-top:1rem;line-height:1.6">${c.description||''}</p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem">
+        <div>
+          <div style="font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem">Case Timeline</div>
+          <div class="timeline">
+            ${(c.timeline||[]).map(t => `
+              <div class="timeline-item">
+                <div class="timeline-dot ${t.done?'done':'pending'}"></div>
+                <div class="timeline-when">${t.date}</div>
+                <div class="timeline-text">${t.label}</div>
+                ${t.note?`<div class="timeline-note">${t.note}</div>`:''}
+              </div>`).join('')}
+          </div>
+        </div>
+
+        <div class="messages-panel">
+          <div class="messages-title">Messages with ${c.lawyer||'Lawyer'}</div>
+          <div class="messages-scroll" id="msgScroll-${c.id}">
+            ${(c.messages||[]).map(m => `
+              <div>
+                <div class="msg-sender">${m.from} · ${m.time}</div>
+                <div class="msg-bubble ${m.from==='Me'?'msg-me':'msg-them'}">${m.text}</div>
+              </div>`).join('')}
+            ${!c.messages?.length ? '<div style="color:var(--muted);font-size:0.85rem;text-align:center;padding:2rem 0">No messages yet</div>' : ''}
+          </div>
+          ${c.lawyer ? `
+          <div class="msg-compose">
+            <input class="msg-input" id="msgInput-${c.id}" placeholder="Type a message…" autocomplete="off"/>
+            <button class="msg-send" onclick="sendMessage(${c.id})">↑</button>
+          </div>` : '<div style="color:var(--muted);font-size:0.82rem;">Awaiting lawyer assignment before messaging.</div>'}
+        </div>
+      </div>`;
+    // scroll messages
+    const s = document.getElementById(`msgScroll-${c.id}`);
+    if(s) s.scrollTop = s.scrollHeight;
+  }
+
+  function sendMessage(caseId) {
+    const input = document.getElementById(`msgInput-${caseId}`);
+    if(!input.value.trim()) return;
+    const c = allCases.find(x => x.id===caseId);
+    if(!c) return;
+    c.messages = c.messages || [];
+    const msg = {from:'Me', text:input.value.trim(), time:'Now'};
+    c.messages.push(msg);
+    input.value='';
+    selectCase(caseId);
+    // send to socket
+    try { socket.emit('sendMessage', {caseId, ...msg}); } catch(_) {}
+  }
+
+  // Keyboard send
+  document.addEventListener('keydown', e => {
+    if(e.key==='Enter' && selectedId) {
+      const inp = document.getElementById(`msgInput-${selectedId}`);
+      if(inp && document.activeElement===inp) sendMessage(selectedId);
+    }
+  });
+
+  // ── Tabs ──
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeTab = btn.dataset.tab;
+      selectedId = null;
+      document.getElementById('detailPanel').innerHTML = '<div class="detail-empty"><div class="detail-empty-icon">⚖</div><p>Select a case to view details</p></div>';
+      renderSidebar();
+    });
+  });
+
+  // ── Load ──
+  async function loadCases() {
+    const token = localStorage.getItem('token');
+    try {
+      const r = await fetch('http://localhost:3000/api/my-cases', { headers:{'Authorization':'Bearer '+(token||'')} });
+      allCases = await r.json();
+    } catch(_) { allCases = getDummy(); }
+    renderSidebar();
+  }
+
+  // ── Socket ──
+  let socket;
+  try {
+    socket = io('http://localhost:3000');
+    socket.on('caseUpdated', updated => {
+      const i = allCases.findIndex(x => x.id===updated.id);
+      if(i>-1) { allCases[i]={...allCases[i],...updated}; renderSidebar(); if(selectedId===updated.id) selectCase(updated.id); }
+    });
+    socket.on('newMessage', ({caseId, from, text, time}) => {
+      const c = allCases.find(x => x.id===caseId);
+      if(c) { c.messages = c.messages||[]; c.messages.push({from,text,time}); if(selectedId===caseId) selectCase(caseId); }
+    });
+  } catch(_) {}
+
+  loadCases();
+</script>
+</body>
+</html>

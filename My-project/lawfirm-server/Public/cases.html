@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>All Cases — Law Firm Connect</title>
+  <link rel="stylesheet" href="css/styles.css"/>
+  <style>
+    /* Hero & Layout Overrides */
+    .page-hero { padding: 5rem 4rem 3rem; position: relative; overflow: hidden; border-bottom: 1px solid var(--navy-border); }
+    .page-hero::before { content:''; position:absolute; right:0; top:0; bottom:0; width:50%; background: radial-gradient(ellipse at right center, rgba(201,168,76,0.06) 0%, transparent 70%); }
+    .cases-main { padding: 3rem 4rem; }
+    .cases-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px,1fr)); gap:1.5rem; }
+    
+    /* State Messaging */
+    .state-msg { text-align: center; padding: 4rem; color: #6c757d; grid-column: 1/-1; }
+    .state-msg-icon { font-size:3rem; display:block; margin-bottom:1rem; opacity:0.3; }
+
+    /* Card Styling */
+    .case-card { background: #fff; border: 1px solid #e0e0e0; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+    .case-card-area { font-size: 0.75rem; font-weight: bold; color: #c9a84c; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .case-card-title { font-size: 1.25rem; font-weight: bold; color: #1a2530; margin-bottom: 0.5rem; }
+    .case-card-desc { font-size: 0.9rem; color: #4a5568; line-height: 1.5; margin-bottom: 1.5rem; flex-grow: 1; }
+    
+    .case-card-meta { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f0f0f0; padding-top: 1rem; }
+    .badge-status { font-size: 0.75rem; background: #e2e8f0; color: #4a5568; padding: 4px 8px; border-radius: 12px; font-weight: bold; text-transform: capitalize; }
+    
+    .btn-card-action { font-size:0.75rem; font-weight:600; text-transform:uppercase; color:#c9a84c; background:transparent; border:1px solid rgba(201,168,76,0.3); padding:4px 14px; border-radius:4px; cursor:pointer; transition: all 0.3s ease; }
+    .btn-card-action:hover { background: rgba(201,168,76,0.1); }
+
+    /* Filters */
+    .filter-bar { display: flex; gap: 1rem; margin-bottom: 2rem; }
+    .filter-input, .filter-select { padding: 0.5rem 1rem; border: 1px solid #ccc; border-radius: 4px; flex: 1; max-width: 300px; }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <img src="image/law-firm-logo.jpg" alt="Law Firm Connect" class="logo" width="60" height="60" onerror="this.style.display='none'"/>
+  <div>
+    <h1>Law Firm Connect</h1>
+    <p>Connecting Clients and Lawyers Seamlessly</p>
+  </div>
+</header>
+
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="index.html">Home</a>
+    <div class="nav-dropdown">
+      <a href="cases.html" class="active">Cases &#9662;</a>
+      <ul class="nav-dropdown-menu">
+        <li><a href="cases.html">Available Cases</a></li>
+        <li><a href="my-cases.html">My Cases</a></li>
+        <li><a href="submit-case.html">Submit a Case</a></li>
+      </ul>
+    </div>
+    <a href="lawyers.html">Lawyers</a>
+    <a href="news.html">News &amp; Insights</a>
+    <a href="about.html">About Us</a>
+    <a href="login.html" class="nav-login-link" id="nav-auth-btn">Login</a>
+  </div>
+</nav>
+
+<main class="cases-main">
+  <div class="filter-bar">
+    <input type="text" id="searchCase" class="filter-input" placeholder="Search by title or area..."/>
+    <label for="filterStatus" class="sr-only" style="display:none;">Filter cases by status</label>
+    <select id="filterStatus" class="filter-select" aria-label="Filter cases by status" title="Filter cases by current workflow status">
+      <option value="">All Statuses</option>
+      <option value="open">Open / Available</option>
+      <option value="pending">Pending</option>
+      <option value="closed">Closed</option>
+    </select>
+  </div>
+
+  <div id="caseList" class="cases-grid">
+    <div class="state-msg"><span class="state-msg-icon">⚖</span>Retrieving live records...</div>
+  </div>
+</main>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+  let allCases = [];
+  
+  // Update this to match the exact URL and port your Node/Express server is running on
+  const API_ENDPOINT = '/api/cases';
+
+  // Helper to prevent XSS attacks
+  const escapeHTML = (str) => {
+    if (!str) return '';
+    return str.replace(/[&<>'"]/g, 
+      tag => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+      }[tag])
+    );
+  };
+
+  // 1. Data Fetcher
+  async function fetchCases() {
+    const list = document.getElementById('caseList');
+    const token = localStorage.getItem('token'); 
+
+    if (!token) {
+      window.location.href = '/login.html';
+      return;
+    }
+
+    try {
+      const response = await fetch(API_ENDPOINT, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        }
+      });
+
+      if (response.status === 401) {
+        console.warn("Session expired. Redirecting to login...");
+        window.location.href = '/login.html';
+        return;
+      }
+
+      if (!response.ok) throw new Error(`Failed to retrieve records. Status: ${response.status}`);
+
+      allCases = await response.json();
+      renderCases();
+
+    } catch (error) {
+      console.error("Fetch error:", error);
+      list.innerHTML = `<div class="state-msg"><span class="state-msg-icon">⚠️</span>System currently offline or unauthorized. Make sure backend is running.</div>`;
+    }
+  }
+
+  // 2. Render Engine
+  function renderCases() {
+    const list = document.getElementById('caseList');
+    const query = document.getElementById('searchCase').value.toLowerCase();
+    const status = document.getElementById('filterStatus').value;
+
+    const filtered = allCases.filter(c => {
+      const safeTitle = (c.title || '').toLowerCase();
+      const safeArea = (c.area || '').toLowerCase();
+      return (safeTitle.includes(query) || safeArea.includes(query)) &&
+             (!status || c.status === status);
+    });
+
+    if (filtered.length === 0) {
+      list.innerHTML = '<div class="state-msg">No cases found matching your criteria.</div>';
+      return;
+    }
+
+    list.innerHTML = filtered.map(c => `
+      <div class="case-card">
+        <div class="case-card-area">${escapeHTML(c.area) || 'General Law'}</div>
+        <div class="case-card-title">${escapeHTML(c.title)}</div>
+        <p class="case-card-desc">${escapeHTML((c.description || '').substring(0, 100))}...</p>
+        <div class="case-card-meta">
+          <span class="badge-status">${escapeHTML(c.status)}</span>
+          <button class="btn-card-action" onclick="window.location.href='case-details.html?id=${c.id}'">View Details</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // 3. Listeners
+  document.getElementById('searchCase').addEventListener('input', renderCases);
+  document.getElementById('filterStatus').addEventListener('change', renderCases);
+
+  // 4. Real-time Updates 
+  // Point Socket.io specifically to your backend URL to avoid connection timeouts
+  const socket = io();
+  socket.on('case_update', () => {
+      fetchCases(); 
+  });
+
+  // Initialize
+  fetchCases();
+</script>
+</body>
+</html>
