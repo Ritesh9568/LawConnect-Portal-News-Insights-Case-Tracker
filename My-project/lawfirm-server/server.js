@@ -2,162 +2,44 @@ const express = require('express');
 const http = require('http');
 const path = require('path');
 const cors = require('cors');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 const socketIO = require('socket.io');
 const axios = require('axios');
+const fetch = require('node-fetch');
 require('dotenv').config();
 
 const pool = require('./db');
-const authRoutes = require('./api/auth');   // ✅ Added
-const caseRoutes = require('./api/cases');     // ADD THIS
-const myCasesRoutes = require('./api/myCases'); // ADD THIS
-const fetch = require('node-fetch');
+const { authenticate, authorize } = require('./middleware/auth');
+
+const authRoutes = require('./api/auth');
+const caseRoutes = require('./api/cases');
+const myCasesRoutes = require('./api/myCases');
+const readerRoutes = require('./api/reader');
 
 const app = express();
 const server = http.createServer(app);
 
 const io = socketIO(server, {
-    cors: {
-        origin: '*'
-    }
+  cors: { origin: '*' }
 });
 
+// Make io accessible inside route handlers via req.app.get('io')
+app.set('io', io);
 
-// ─── MIDDLEWARES ─────────────────────────────────────────────────────────────
+// ─── MIDDLEWARE ───────────────────────────────────────────────────────────────
 app.use(cors());
 app.use(express.json());
-
 app.use(express.static(path.join(__dirname, 'Public')));
-app.use(express.static(path.join(__dirname, 'public')));
 
-// ✅ REGISTER AUTH ROUTES
+// ─── ROUTES ──────────────────────────────────────────────────────────────────
 app.use('/api', authRoutes);
-app.use('/api/cases', caseRoutes);             // ADD THIS
-app.use('/api/my-cases', myCasesRoutes);   
-console.log("✅ Auth routes mounted at /api");
+app.use('/api/cases', caseRoutes);
+app.use('/api/my-cases', myCasesRoutes);
+app.use('/api/reader', readerRoutes);
 
-// ─── API KEY ROTATION LOGIC ──────────────────────────────────────────────────
-const getNewsApiKey = (attempt = 0) => {
-    const keys = [
-        process.env.NEWS_API_KEY_PRIMARY,
-        process.env.NEWS_API_KEY_SECONDARY
-    ];
+console.log('✅ All routes mounted.');
 
-    return keys[attempt % keys.length];
-};
-
-// ─── AUTHENTICATION ENGINE ──────────────────────────────────────────────────
-const authenticate = (req, res, next) => {
-    const token = req.headers.authorization?.split(' ')[1];
-
-    if (!token) {
-        return res.status(403).json({
-            error: 'No token provided.'
-        });
-    }
-
-    try {
-        req.user = jwt.verify(
-            token,
-            process.env.JWT_SECRET
-        );
-
-        next();
-    } catch (err) {
-        return res.status(401).json({
-            error: 'Invalid or expired token.'
-        });
-    }
-};
-
-const authorize = (roles) => (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
-        return res.status(403).json({
-            error: 'Access Denied.'
-        });
-    }
-
-    next();
-};
-
-// ─── NEWS & DASHBOARD ENDPOINT ───────────────────────────────────────────────
-app.get('/api/reader/dashboard', async (req, res) => {
-    try {
-        const casesQuery = await pool.query(`
-            SELECT id, title, status, area, created_on
-            FROM cases
-            WHERE status IN ('open', 'pending')
-            ORDER BY created_on DESC
-        `);
-
-        const lawyersQuery = await pool.query(`
-            SELECT name, specialization, cases_won, cases_lost
-            FROM lawyers
-            ORDER BY cases_won DESC
-        `);
-
-        let newsArticles = [];
-
-        // Try API keys one by one
-        for (let i = 0; i < 2; i++) {
-            try {
-                const response = await axios.get(
-                    'https://newsapi.org/v2/everything',
-                    {
-                        params: {
-                            q: 'law OR legal',
-                            language: 'en',
-                            pageSize: 5,
-                            apiKey: getNewsApiKey(i)
-                        },
-                        timeout: 4000
-                    }
-                );
-
-                newsArticles = response.data.articles.map((art, idx) => ({
-                    id: `ext-${idx}`,
-                    title: art.title,
-                    summary: art.description,
-                    url: art.url
-                }));
-
-                break;
-            } catch (err) {
-                console.warn(`News API Key ${i + 1} failed.`);
-            }
-        }
-
-        // Database fallback
-        if (newsArticles.length === 0) {
-            const localNews = await pool.query(`
-                SELECT id, title, summary, published_at
-                FROM news
-                ORDER BY published_at DESC
-                LIMIT 5
-            `);
-
-            newsArticles = localNews.rows;
-        }
-
-        res.json({
-            success: true,
-            cases: casesQuery.rows,
-            leaderboard: lawyersQuery.rows,
-            news: newsArticles
-        });
-
-    } catch (err) {
-        console.error('Dashboard Error:', err);
-
-        res.status(500).json({
-            error: 'Dashboard error.'
-        });
-    }
-});
-
-
-// News proxy route — add this with your other routes
+// ─── NEWS API PROXY ───────────────────────────────────────────────────────────
+// Keeps the Anthropic API key server-side. Frontend posts query, gets articles back.
 app.post('/api/news', async (req, res) => {
   try {
     const { query } = req.body;
@@ -197,16 +79,86 @@ Return exactly 10 items. Dates and URLs must be real.`,
   }
 });
 
+// ─── DASHBOARD ROUTE (now protected) ─────────────────────────────────────────
+// Moved here from api/reader.js to keep it co-located with the news API key logic.
+// Requires a valid token — any role can view the dashboard.
+app.get('/api/reader/dashboard', authenticate, async (req, res) => {
+  try {
+    const casesQuery = await pool.query(`
+      SELECT id, title, status, area, created_on
+      FROM cases
+      WHERE status IN ('open', 'pending')
+      ORDER BY created_on DESC
+    `);
 
-// ─── CASE OPERATIONS & SOCKETS ──────────────────────────────────────────────
-// Keep your existing Case CRUD, LISTEN/NOTIFY, and Socket.IO code here.
+    const lawyersQuery = await pool.query(`
+      SELECT name, specialization, cases_won, cases_lost
+      FROM lawyers
+      ORDER BY cases_won DESC
+    `);
 
-// ─── SERVER START ────────────────────────────────────────────────────────────
+    let newsArticles = [];
+
+    // Try primary then secondary news API key
+    const keys = [process.env.NEWS_API_KEY_PRIMARY, process.env.NEWS_API_KEY_SECONDARY].filter(Boolean);
+    for (const key of keys) {
+      try {
+        const response = await axios.get('https://newsapi.org/v2/everything', {
+          params: { q: 'law OR legal', language: 'en', pageSize: 5, apiKey: key },
+          timeout: 4000
+        });
+        newsArticles = response.data.articles.map((art, idx) => ({
+          id: `ext-${idx}`,
+          title: art.title,
+          summary: art.description,
+          url: art.url
+        }));
+        break;
+      } catch (err) {
+        console.warn(`News API key failed, trying next.`);
+      }
+    }
+
+    // DB fallback if both keys fail
+    if (newsArticles.length === 0) {
+      const localNews = await pool.query(`
+        SELECT id, title, summary, published_at
+        FROM news
+        ORDER BY published_at DESC
+        LIMIT 5
+      `);
+      newsArticles = localNews.rows;
+    }
+
+    res.json({
+      success: true,
+      cases: casesQuery.rows,
+      leaderboard: lawyersQuery.rows,
+      news: newsArticles
+    });
+
+  } catch (err) {
+    console.error('Dashboard error:', err);
+    res.status(500).json({ error: 'Dashboard error.' });
+  }
+});
+
+// ─── SOCKET.IO ────────────────────────────────────────────────────────────────
+io.on('connection', (socket) => {
+  console.log(`🔌 Client connected: ${socket.id}`);
+
+  socket.on('sendMessage', ({ caseId, from, text, time }) => {
+    // Broadcast to all clients (in a real app, scope to a room by caseId)
+    io.emit('newMessage', { caseId, from, text, time });
+  });
+
+  socket.on('disconnect', () => {
+    console.log(`🔌 Client disconnected: ${socket.id}`);
+  });
+});
+
+// ─── START ────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
-
 server.listen(PORT, () => {
-    console.log(`🚀 Portal streaming on port ${PORT}`);
-    console.log(`🔐 Auth APIs available at:`);
-    console.log(`   POST http://localhost:${PORT}/login.html`);
-    console.log(`   POST http://localhost:${PORT}/register.html`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
